@@ -17,17 +17,24 @@
 	
 	NSMutableArray *people;
 	NSMutableArray *restaurants;
+	
+	//YOU
 	NSString *myName;
+	BOOL usedVeto;
 }
 
 - (void)addRestaurant:(NSString *)newRestaurant;
 
-- (void)imIn:(id)sender;
-- (void)imOut:(id)sender;
+- (IBAction)imIn:(id)sender;
+- (IBAction)imOut:(id)sender;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
 
 - (void)checkInWithAll:(id)sender;
+
+- (IBAction)restaurantClickAction:(id)sender;
+- (void)voteForRestaurant:(NNRestaurant *)restaurant;
+- (void)vetoRestaurant:(NNRestaurant *)restaurant;
 
 //- (NSMenu *)applicationDockMenu:(NSApplication *)sender;
 

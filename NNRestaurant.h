@@ -19,7 +19,7 @@
 
 - (id)initWithName:(NSString *)theName;
 
-- (NSURL *)stateImage;
+- (NSImage *)stateImage;
 
 
 @end

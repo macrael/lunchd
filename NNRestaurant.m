@@ -23,4 +23,18 @@
 	return self;
 }
 
+- (NSImage *)stateImage
+{
+	if (state == NNUndefinedState){
+		return [NSImage imageNamed:@"NSAddTemplate"];
+	}
+	else if (state == NNVetoedState){
+		return [NSImage imageNamed:@"NSStopProgressTemplate"];
+	}
+	else if (state == NNVotedForState){
+		return [NSImage imageNamed:@"NSAddTemplate"];
+	}
+	return nil;
+}
+
 @end
