@@ -151,6 +151,17 @@
 
 // ---------- TABLE VIEW DELEGATE
 
-
+- (void)tableView:(NSTableView *)aTableView 
+  willDisplayCell:(id)aCell
+   forTableColumn:(NSTableColumn *)aTableColumn
+			  row:(int)rowIndex
+{
+	// get data object
+	if ([[aCell class] isEqual: [NSButtonCell class]]){
+		NSLog(@"BUTTON CELL");
+		[aCell setButtonType:NSMomentaryPushInButton];
+		[aCell setTitle:@"UP"];
+	}
+}
 
 @end

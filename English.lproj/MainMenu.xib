@@ -2,17 +2,17 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="8.00">
 	<data>
 		<int key="IBDocument.SystemTarget">1060</int>
-		<string key="IBDocument.SystemVersion">10D564</string>
+		<string key="IBDocument.SystemVersion">10C2234</string>
 		<string key="IBDocument.InterfaceBuilderVersion">740</string>
-		<string key="IBDocument.AppKitVersion">1038.29</string>
-		<string key="IBDocument.HIToolboxVersion">460.00</string>
+		<string key="IBDocument.AppKitVersion">1038.25</string>
+		<string key="IBDocument.HIToolboxVersion">458.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			<string key="NS.object.0">740</string>
 		</object>
 		<array class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<integer value="57"/>
-			<integer value="472"/>
+			<integer value="478"/>
 		</array>
 		<array key="IBDocument.PluginDependencies">
 			<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -1411,7 +1411,7 @@
 														<reference key="NSTextColor" ref="501563644"/>
 													</object>
 													<object class="NSTextFieldCell" key="NSDataCell" id="1030006230">
-														<int key="NSCellFlags">337772096</int>
+														<int key="NSCellFlags">67239488</int>
 														<int key="NSCellFlags2">2048</int>
 														<string key="NSContents">Text Cell</string>
 														<reference key="NSSupport" ref="745138492"/>
@@ -1453,7 +1453,6 @@
 									<reference key="NSSuperview" ref="835043264"/>
 									<reference key="NSTarget" ref="835043264"/>
 									<string key="NSAction">_doScroller:</string>
-									<double key="NSCurValue">0.019736842105263157</double>
 									<double key="NSPercent">0.95065789473684215</double>
 								</object>
 								<object class="NSScroller" id="207635212">
@@ -1464,7 +1463,7 @@
 									<int key="NSsFlags">1</int>
 									<reference key="NSTarget" ref="835043264"/>
 									<string key="NSAction">_doScroller:</string>
-									<double key="NSCurValue">0.96527777777777779</double>
+									<double key="NSCurValue">1</double>
 									<double key="NSPercent">0.95049504950495045</double>
 								</object>
 							</array>
@@ -3134,7 +3133,7 @@
 						<reference key="parent" ref="0"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">503</int>
+						<int key="objectID">505</int>
 						<reference key="object" ref="263406792"/>
 						<reference key="parent" ref="721798359"/>
 					</object>
@@ -3271,9 +3270,9 @@
 				<integer value="1" key="351.ImportedFromIB2"/>
 				<string key="354.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<integer value="1" key="354.ImportedFromIB2"/>
-				<string key="371.IBEditorWindowLastContentRect">{{241, 316}, {487, 384}}</string>
+				<string key="371.IBEditorWindowLastContentRect">{{1106, 629}, {487, 384}}</string>
 				<string key="371.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="371.IBWindowTemplateEditedContentRect">{{241, 316}, {487, 384}}</string>
+				<string key="371.IBWindowTemplateEditedContentRect">{{1106, 629}, {487, 384}}</string>
 				<integer value="1" key="371.NSWindowTemplate.visibleAtLaunch"/>
 				<string key="371.editorWindowContentRectSynchronizationRect">{{33, 99}, {480, 360}}</string>
 				<string key="371.windowTemplate.maxSize">{3.40282e+38, 3.40282e+38}</string>
@@ -3352,7 +3351,8 @@
 				<string key="482.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="5.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<integer value="1" key="5.ImportedFromIB2"/>
-				<string key="503.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="505.CustomClassName">NSButtonCell</string>
+				<string key="505.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="56.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<integer value="1" key="56.ImportedFromIB2"/>
 				<string key="57.IBEditorWindowLastContentRect">{{71, 51}, {242, 183}}</string>
@@ -3391,7 +3391,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">503</int>
+			<int key="maxID">505</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
