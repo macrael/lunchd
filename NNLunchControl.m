@@ -134,7 +134,12 @@
 		}
 		
 		if ([[aTableColumn identifier] isEqualToString:@"buttonCol"]){
-			return [[restaurants objectAtIndex:rowIndex] stateImage];
+//			return [[restaurants objectAtIndex:rowIndex] stateImage];
+			NSButton *button = [[NSButtonCell alloc] init];
+			[button setButtonType:NSMomentaryPushInButton];
+			[button setTitle:@"HALLO"];
+
+			return [NSNumber numberWithInt:1];
 		}
 	}else if (aTableView == peopleTable) {
 		return nil;	
