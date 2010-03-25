@@ -11,6 +11,9 @@
 
 @implementation NNLunchControl
 
+@synthesize restaurants;
+@synthesize people;
+
 - (id) init
 {
 	self = [super init];
@@ -25,13 +28,11 @@
 		
 		people = [[NSMutableArray alloc] init];
 		restaurants = [[NSMutableArray alloc] init];
-		
 		NSArray *resturantNames = [defaults arrayForKey:@"restaurants"];
 		for (NSString *rName in resturantNames){
 			NNRestaurant *r = [[NNRestaurant alloc] initWithName:rName];
 			[restaurants addObject:r];
-		}
-		
+		}		
 	}
 	return self;
 }
@@ -83,11 +84,7 @@
 
 - (void)voteForRestaurant:(NNRestaurant *)restaurant
 {
-	if ([restaurant state] == NNVetoedState){
-		NSLog(@"ERROR: Should not be able to vote for a vetoed restraunt.");
-		return;
-	}
-	[restaurant setState:NNVotedForState];
+	[restaurant giveVote];
 	[restaurants removeObject:restaurant];
 	[restaurants insertObject:restaurant atIndex:0];
 }
@@ -99,7 +96,7 @@
 		//put in good error.
 		return;
 	}
-	[restaurant setState:NNVetoedState];
+	[restaurant giveVeto];
 	[restaurants removeObject:restaurant];
 	[restaurants addObject:restaurant];
 	usedVeto = YES;
@@ -112,7 +109,7 @@
 	NSLog(@"CHEKING IN");
 }
 
-// ------- TABLE VIEW DATA SOURCE
+// ------- TABLE VIEW DATA SOURCE  ------ Seems like this could be done with bindings, but custom cell doesn't seem to like that. 
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
@@ -129,18 +126,8 @@
 - (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	if (aTableView == restaurantsTable){
-		if ([[aTableColumn identifier] isEqualToString:@"nameCol"]){
-			return [[restaurants objectAtIndex:rowIndex]name];
-		}
-		
-		if ([[aTableColumn identifier] isEqualToString:@"buttonCol"]){
-//			return [[restaurants objectAtIndex:rowIndex] stateImage];
-			NSButton *button = [[NSButtonCell alloc] init];
-			[button setButtonType:NSMomentaryPushInButton];
-			[button setTitle:@"HALLO"];
-
-			return [NSNumber numberWithInt:1];
-		}
+		NSLog(@"NNNN: %@",[[restaurants objectAtIndex:rowIndex] name]);
+		return [restaurants objectAtIndex:rowIndex];
 	}else if (aTableView == peopleTable) {
 		return nil;	
 	}
@@ -157,11 +144,11 @@
 			  row:(int)rowIndex
 {
 	// get data object
-	if ([[aCell class] isEqual: [NSButtonCell class]]){
-		NSLog(@"BUTTON CELL");
-		[aCell setButtonType:NSMomentaryPushInButton];
-		[aCell setTitle:@"UP"];
-	}
+//	if ([[aCell class] isEqual: [NSButtonCell class]]){
+//		NSLog(@"BUTTON CELL");
+//		[aCell setButtonType:NSMomentaryPushInButton];
+//		[aCell setTitle:@"UP"];
+//	}
 }
 
 @end

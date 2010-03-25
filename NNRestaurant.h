@@ -9,17 +9,17 @@
 #import <Cocoa/Cocoa.h>
 #import "NNLStatics.h"
 
-@interface NNRestaurant : NSObject {
+@interface NNRestaurant : NSObject <NSCopying> {
 	NSString *name;
-	int state;
+	int votes;		//-1 for vetoed, 0 for neutral, + for number?
 }
 
 @property (copy) NSString *name;
-@property (assign) int state;
+@property (assign) int votes;
 
 - (id)initWithName:(NSString *)theName;
 
-- (NSImage *)stateImage;
-
+- (void)giveVote;
+- (void)giveVeto;
 
 @end

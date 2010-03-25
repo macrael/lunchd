@@ -11,30 +11,45 @@
 @implementation NNRestaurant
 
 @synthesize name;
-@synthesize state;
+@synthesize votes;
 
 - (id)initWithName:(NSString *)theName
 {
 	self = [super init];
 	if (self){
 		[self setName:theName];
-		[self setState:NNUndefinedState];
+		[self setVotes:0];
 	}
 	return self;
 }
 
-- (NSImage *)stateImage
+-(void)dealloc
 {
-	if (state == NNUndefinedState){
-		return [NSImage imageNamed:@"NSAddTemplate"];
+	[name release];
+	[super dealloc];
+}
+
+- (void)giveVote
+{
+	if (votes >=0){
+		[self setVotes: votes + 1];
+	}else {
+		NSLog(@"ERROR: Shouldn't be voting for a vetoed place.");
 	}
-	else if (state == NNVetoedState){
-		return [NSImage imageNamed:@"NSStopProgressTemplate"];
+}
+- (void)giveVeto
+{
+	if (votes == -1){
+		NSLog(@"ERROR: Shouldn't be vetoing an already vetoed place.");
 	}
-	else if (state == NNVotedForState){
-		return [NSImage imageNamed:@"NSAddTemplate"];
-	}
-	return nil;
+	[self setVotes:-1];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+	NNRestaurant *copiedRest = [[[self class] allocWithZone:zone] initWithName:[[self name] copy]];
+	[copiedRest setVotes:[self votes]];
+	return copiedRest;
 }
 
 @end

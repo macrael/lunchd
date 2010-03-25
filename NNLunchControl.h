@@ -23,6 +23,9 @@
 	BOOL usedVeto;
 }
 
+@property (retain) NSMutableArray *restaurants;
+@property (retain) NSMutableArray *people;
+
 - (void)addRestaurant:(NSString *)newRestaurant;
 
 - (IBAction)imIn:(id)sender;

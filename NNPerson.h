@@ -7,16 +7,18 @@
 //
 
 #import <Cocoa/Cocoa.h>
-
+#import "NNLStatics.h"
 
 @interface NNPerson : NSObject {
 	NSString *name;
 	int state;
+	NSString *veto;		//veto is a string if it has been used, or nil if it has not.
+	NSArray *votes;		//votes is a list of strings of restraunts they have voted for. 
 }
 
 @property (copy) NSString *name;
 @property (assign) int state;
-
-- (NSURL *)stateImage;
+@property (copy) NSString *veto;
+@property (retain) NSArray *votes;
 
 @end

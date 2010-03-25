@@ -11,4 +11,21 @@
 
 @implementation NNPerson
 
+@synthesize name;
+@synthesize state;
+@synthesize veto;
+@synthesize votes;
+
+- (id)initWithName:(NSString *)newName
+{
+	self = [super init];
+	if (self){
+		[self setName:newName];
+		[self setState:NNUndefinedState];
+		[self setVeto:nil];
+		[self setVotes:nil];
+	}
+	return self;
+}
+
 @end
