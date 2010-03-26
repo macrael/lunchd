@@ -44,6 +44,19 @@
 	[super dealloc];
 }
 
+- (void)awakeFromNib
+{
+	NSLog(@"I HAVE AWOKEN");
+	//lets try putting a new view in the view. 
+	
+	NNRestaurantView *oneRV = restaurantTemplate;
+	[oneRV setFrame:NSMakeRect(0, 0, 300, 60)];
+	NNRestaurantView *twoRV = [[NNRestaurantView alloc] initWithFrame:NSMakeRect(0, 61, 300, 60)];
+	[restaurantSSView addSubview:oneRV];
+	[restaurantSSView addSubview:twoRV];
+	
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
 	NSLog(@"GAMEON");
@@ -107,48 +120,6 @@
 - (void)checkInWithAll:(id)sender
 {
 	NSLog(@"CHEKING IN");
-}
-
-// ------- TABLE VIEW DATA SOURCE  ------ Seems like this could be done with bindings, but custom cell doesn't seem to like that. 
-
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
-{
-	if (aTableView == restaurantsTable){
-		return [restaurants count];
-	}
-	else if (aTableView == peopleTable){
-		return [people count];
-	}
-	NSLog(@"WHAT??? BAD TABLE %@",aTableView);
-	return -1;
-}
-
-- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
-{
-	if (aTableView == restaurantsTable){
-		NSLog(@"NNNN: %@",[[restaurants objectAtIndex:rowIndex] name]);
-		return [restaurants objectAtIndex:rowIndex];
-	}else if (aTableView == peopleTable) {
-		return nil;	
-	}
-	NSLog(@"WHAT? BadCOl");
-	return nil;
-}
-
-
-// ---------- TABLE VIEW DELEGATE
-
-- (void)tableView:(NSTableView *)aTableView 
-  willDisplayCell:(id)aCell
-   forTableColumn:(NSTableColumn *)aTableColumn
-			  row:(int)rowIndex
-{
-	// get data object
-//	if ([[aCell class] isEqual: [NSButtonCell class]]){
-//		NSLog(@"BUTTON CELL");
-//		[aCell setButtonType:NSMomentaryPushInButton];
-//		[aCell setTitle:@"UP"];
-//	}
 }
 
 @end

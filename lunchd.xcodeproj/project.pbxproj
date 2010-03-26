@@ -8,11 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
-		46678D3E115AFC8500B7C9C2 /* NNCustomCells.m in Sources */ = {isa = PBXBuildFile; fileRef = 46678D3D115AFC8500B7C9C2 /* NNCustomCells.m */; };
 		46679001115B3DCE00B7C9C2 /* veto_press.png in Resources */ = {isa = PBXBuildFile; fileRef = 46678FFD115B3DCE00B7C9C2 /* veto_press.png */; };
 		46679002115B3DCE00B7C9C2 /* veto_reg.png in Resources */ = {isa = PBXBuildFile; fileRef = 46678FFE115B3DCE00B7C9C2 /* veto_reg.png */; };
 		46679003115B3DCE00B7C9C2 /* vote_press.png in Resources */ = {isa = PBXBuildFile; fileRef = 46678FFF115B3DCE00B7C9C2 /* vote_press.png */; };
 		46679004115B3DCE00B7C9C2 /* vote_reg.png in Resources */ = {isa = PBXBuildFile; fileRef = 46679000115B3DCE00B7C9C2 /* vote_reg.png */; };
+		46B5E139115CA479006C44F8 /* NNSlidingStackView.m in Sources */ = {isa = PBXBuildFile; fileRef = 46B5E138115CA479006C44F8 /* NNSlidingStackView.m */; };
+		46B5E170115CAA03006C44F8 /* NNRestaurantView.m in Sources */ = {isa = PBXBuildFile; fileRef = 46B5E16F115CAA03006C44F8 /* NNRestaurantView.m */; };
 		86F9B6D211476B4200E5FAFE /* NNLunchControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 86F9B6D111476B4200E5FAFE /* NNLunchControl.m */; };
 		86F9B6E1114771E300E5FAFE /* NNRestaurant.m in Sources */ = {isa = PBXBuildFile; fileRef = 86F9B6E0114771E300E5FAFE /* NNRestaurant.m */; };
 		86F9B6E51147730400E5FAFE /* NNPerson.m in Sources */ = {isa = PBXBuildFile; fileRef = 86F9B6E41147730400E5FAFE /* NNPerson.m */; };
@@ -30,12 +31,14 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* lunchd_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lunchd_Prefix.pch; sourceTree = "<group>"; };
-		46678D3C115AFC8500B7C9C2 /* NNCustomCells.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNCustomCells.h; sourceTree = "<group>"; };
-		46678D3D115AFC8500B7C9C2 /* NNCustomCells.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNCustomCells.m; sourceTree = "<group>"; };
 		46678FFD115B3DCE00B7C9C2 /* veto_press.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = veto_press.png; path = resources/veto_press.png; sourceTree = "<group>"; };
 		46678FFE115B3DCE00B7C9C2 /* veto_reg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = veto_reg.png; path = resources/veto_reg.png; sourceTree = "<group>"; };
 		46678FFF115B3DCE00B7C9C2 /* vote_press.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = vote_press.png; path = resources/vote_press.png; sourceTree = "<group>"; };
 		46679000115B3DCE00B7C9C2 /* vote_reg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = vote_reg.png; path = resources/vote_reg.png; sourceTree = "<group>"; };
+		46B5E137115CA479006C44F8 /* NNSlidingStackView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNSlidingStackView.h; sourceTree = "<group>"; };
+		46B5E138115CA479006C44F8 /* NNSlidingStackView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNSlidingStackView.m; sourceTree = "<group>"; };
+		46B5E16E115CAA03006C44F8 /* NNRestaurantView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNRestaurantView.h; sourceTree = "<group>"; };
+		46B5E16F115CAA03006C44F8 /* NNRestaurantView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNRestaurantView.m; sourceTree = "<group>"; };
 		86F9B6D011476B4200E5FAFE /* NNLunchControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNLunchControl.h; sourceTree = "<group>"; };
 		86F9B6D111476B4200E5FAFE /* NNLunchControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNLunchControl.m; sourceTree = "<group>"; };
 		86F9B6DF114771E300E5FAFE /* NNRestaurant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNRestaurant.h; sourceTree = "<group>"; };
@@ -68,8 +71,10 @@
 				86F9B6E0114771E300E5FAFE /* NNRestaurant.m */,
 				86F9B6D011476B4200E5FAFE /* NNLunchControl.h */,
 				86F9B6D111476B4200E5FAFE /* NNLunchControl.m */,
-				46678D3C115AFC8500B7C9C2 /* NNCustomCells.h */,
-				46678D3D115AFC8500B7C9C2 /* NNCustomCells.m */,
+				46B5E137115CA479006C44F8 /* NNSlidingStackView.h */,
+				46B5E138115CA479006C44F8 /* NNSlidingStackView.m */,
+				46B5E16E115CAA03006C44F8 /* NNRestaurantView.h */,
+				46B5E16F115CAA03006C44F8 /* NNRestaurantView.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -208,7 +213,8 @@
 				86F9B6D211476B4200E5FAFE /* NNLunchControl.m in Sources */,
 				86F9B6E1114771E300E5FAFE /* NNRestaurant.m in Sources */,
 				86F9B6E51147730400E5FAFE /* NNPerson.m in Sources */,
-				46678D3E115AFC8500B7C9C2 /* NNCustomCells.m in Sources */,
+				46B5E139115CA479006C44F8 /* NNSlidingStackView.m in Sources */,
+				46B5E170115CAA03006C44F8 /* NNRestaurantView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

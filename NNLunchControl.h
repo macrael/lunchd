@@ -9,11 +9,17 @@
 #import <Cocoa/Cocoa.h>
 #import "NNRestaurant.h"
 #import "NNPerson.h"
+#import "NNRestaurantView.h"
+#import "NNSlidingStackView.h"
 
 
 @interface NNLunchControl : NSObject {
 	IBOutlet NSTableView *peopleTable;
 	IBOutlet NSTableView *restaurantsTable;
+	
+	IBOutlet NNSlidingStackView *restaurantSSView;
+	
+	IBOutlet NNRestaurantView *restaurantTemplate;
 	
 	NSMutableArray *people;
 	NSMutableArray *restaurants;
