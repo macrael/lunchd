@@ -32,19 +32,23 @@
 @property (retain) NSMutableArray *restaurants;
 @property (retain) NSMutableArray *people;
 
-- (void)addRestaurant:(NSString *)newRestaurant;
+//- (void)addRestaurant:(NSString *)newRestaurant;
 
 - (IBAction)imIn:(id)sender;
 - (IBAction)imOut:(id)sender;
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
 
 - (void)checkInWithAll:(id)sender;
 
-- (IBAction)restaurantClickAction:(id)sender;
-- (void)voteForRestaurant:(NNRestaurant *)restaurant;
-- (void)vetoRestaurant:(NNRestaurant *)restaurant;
+
+- (IBAction)voteButtonPress:(id)sender;
+- (IBAction)vetoButtonPress:(id)sender;
+
+- (void)updateRestaurantPosition:(NNRestaurant *)restaurant;
+
 
 //- (NSMenu *)applicationDockMenu:(NSApplication *)sender;
+
+- (IBAction)debugButtonClick:(id)sender;
 
 @end

@@ -12,6 +12,7 @@
 
 @synthesize name;
 @synthesize votes;
+@synthesize hasYourVote;
 
 - (id)initWithName:(NSString *)theName
 {
@@ -19,6 +20,7 @@
 	if (self){
 		[self setName:theName];
 		[self setVotes:0];
+		[self setHasYourVote:NO];
 	}
 	return self;
 }
@@ -31,10 +33,12 @@
 
 - (void)giveVote
 {
-	if (votes >=0){
+	//right now can give infinite votes.
+	if (votes >=0 && !hasYourVote){
+		[self setHasYourVote:YES];
 		[self setVotes: votes + 1];
 	}else {
-		NSLog(@"ERROR: Shouldn't be voting for a vetoed place.");
+		NSLog(@"ERROR: Shouldn't be voting for this place.");
 	}
 }
 - (void)giveVeto

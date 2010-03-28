@@ -11,30 +11,100 @@
 
 @implementation NNRestaurantView
 
-- (id)initWithFrame:(NSRect)frame {
+- (id)initWithFrame:(NSRect)frame andController:(id)controller{
     self = [super initWithFrame:frame];
     if (self) {
 		NSLog(@"I HAVE BEEN Cratered");
+		[self setAutoresizingMask:NSViewWidthSizable];
+		
+		NSRect aFrame;
+		aFrame.origin = (NSPoint){ 10, 15};
+		aFrame.size = (NSSize){70,30};
+		voteButton = [[NSButton alloc] initWithFrame:aFrame];
+		[voteButton setButtonType:NSMomentaryLightButton];
+		[voteButton setBezelStyle:NSRoundedBezelStyle];
+		[voteButton setTitle:@"Vote"];
+		[voteButton setAction:@selector(voteButtonPress:)];
+		[voteButton setTarget:controller];
+		
+		aFrame.origin = (NSPoint){ frame.size.width - 80, 15};
+		aFrame.size = (NSSize){70,30};
+		vetoButton = [[NSButton alloc] initWithFrame:aFrame];
+		[vetoButton setButtonType:NSMomentaryLightButton];
+		[vetoButton setBezelStyle:NSRoundedBezelStyle];
+		[vetoButton setTitle:@"Veto"];
+		[vetoButton setAutoresizingMask:NSViewMaxXMargin];
+		[vetoButton setAction:@selector(vetoButtonPress:)];
+		[vetoButton setTarget:controller];
+
+		aFrame.origin = (NSPoint){ 80, 15};
+		aFrame.size = (NSSize){140,25};		
+		nameField = [[NSTextField alloc] initWithFrame:aFrame];
+		[nameField setBordered:NO];
+		[nameField setEditable:NO];
+		[nameField setDrawsBackground:NO];
+		[nameField setStringValue:@"NO NAME YET"];
+		
+		[self addSubview:nameField];
+		[self addSubview:voteButton];
+		[self addSubview:vetoButton];
+		
 	}
     return self;
 }
 
-- (void)awakeFromNib
+- (void)setRepresentedRestaurant:(NNRestaurant *)restaurant
 {
-	NSLog(@"RVIEW AWAKES");
+	if (representedRestaurant == restaurant){
+		return;
+	}
+	[representedRestaurant release];
+	representedRestaurant = [restaurant retain];
+	
+	[representedRestaurant addObserver:self
+							forKeyPath:@"votes"
+							   options:0
+							   context:NULL];
+	[self updateState];
 }
 
-- (BOOL)isOpaque
+- (NNRestaurant *)representedRestaurant
 {
-	return YES;
+	return representedRestaurant;
 }
 
-- (void)drawRect:(NSRect)rect
+- (void)observeValueForKeyPath:(NSString *)keyPath
+					  ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context
 {
-    // erase the background by drawing white
-	//might be all I need to do here, others will draw on top. 
-    [[NSColor blueColor] set];
-    [NSBezierPath fillRect:rect];
+	NSLog(@"KEYPATH CHANGE");
+    if ([keyPath isEqual:@"votes"]) {
+		[self updateState];
+    }else{
+		[super observeValueForKeyPath:keyPath
+							 ofObject:object
+							   change:change
+							  context:context];
+	}
+}
+
+- (void)updateState
+{
+	if (!representedRestaurant){
+		NSLog(@"NOTHING TO UPDATE WITH?");
+	}
+	
+	[nameField setStringValue:[representedRestaurant name]];
+	int votes = [representedRestaurant votes];
+	if (votes == -1){
+		[vetoButton setEnabled:NO];
+		[voteButton setEnabled:NO];
+		[nameField setTextColor:[NSColor grayColor]];
+	}
+	if ([representedRestaurant hasYourVote]){
+		[voteButton setEnabled:NO];
+	}
 }
 
 @end

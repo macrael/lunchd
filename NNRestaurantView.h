@@ -7,12 +7,24 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "NNRestaurant.h"
 
 
 @interface NNRestaurantView : NSView {
-//	IBOutlet NSTextField nameField;
-//	IBOutlet NSButton voteButton;
-//	IBOutlet NSButton vetoButton;
+	NSTextField *nameField;
+	NSButton *voteButton;
+	NSButton *vetoButton;
+	
+	NNRestaurant *representedRestaurant;
 }
+- (id)initWithFrame:(NSRect)frame andController:(id)controller;
+
+- (void)setRepresentedRestaurant:(NNRestaurant *)restaurant;
+- (NNRestaurant *)representedRestaurant;
+
+//This takes the state in the object and redraws.
+//gets called by observing the votes attribute on the represented restaurant
+- (void)updateState;
+
 
 @end
