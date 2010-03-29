@@ -14,6 +14,8 @@
 		46679004115B3DCE00B7C9C2 /* vote_reg.png in Resources */ = {isa = PBXBuildFile; fileRef = 46679000115B3DCE00B7C9C2 /* vote_reg.png */; };
 		46B5E139115CA479006C44F8 /* NNSlidingStackView.m in Sources */ = {isa = PBXBuildFile; fileRef = 46B5E138115CA479006C44F8 /* NNSlidingStackView.m */; };
 		46B5E170115CAA03006C44F8 /* NNRestaurantView.m in Sources */ = {isa = PBXBuildFile; fileRef = 46B5E16F115CAA03006C44F8 /* NNRestaurantView.m */; };
+		46B5E45F115FEAED006C44F8 /* NNNetworkSync.m in Sources */ = {isa = PBXBuildFile; fileRef = 46B5E45E115FEAED006C44F8 /* NNNetworkSync.m */; };
+		46B5E4D31160002D006C44F8 /* AsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 46B5E4D21160002D006C44F8 /* AsyncSocket.m */; };
 		86F9B6D211476B4200E5FAFE /* NNLunchControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 86F9B6D111476B4200E5FAFE /* NNLunchControl.m */; };
 		86F9B6E1114771E300E5FAFE /* NNRestaurant.m in Sources */ = {isa = PBXBuildFile; fileRef = 86F9B6E0114771E300E5FAFE /* NNRestaurant.m */; };
 		86F9B6E51147730400E5FAFE /* NNPerson.m in Sources */ = {isa = PBXBuildFile; fileRef = 86F9B6E41147730400E5FAFE /* NNPerson.m */; };
@@ -39,6 +41,10 @@
 		46B5E138115CA479006C44F8 /* NNSlidingStackView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNSlidingStackView.m; sourceTree = "<group>"; };
 		46B5E16E115CAA03006C44F8 /* NNRestaurantView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNRestaurantView.h; sourceTree = "<group>"; };
 		46B5E16F115CAA03006C44F8 /* NNRestaurantView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNRestaurantView.m; sourceTree = "<group>"; };
+		46B5E45D115FEAED006C44F8 /* NNNetworkSync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNNetworkSync.h; sourceTree = "<group>"; };
+		46B5E45E115FEAED006C44F8 /* NNNetworkSync.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNNetworkSync.m; sourceTree = "<group>"; };
+		46B5E4D11160002D006C44F8 /* AsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AsyncSocket.h; sourceTree = "<group>"; };
+		46B5E4D21160002D006C44F8 /* AsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AsyncSocket.m; sourceTree = "<group>"; };
 		86F9B6D011476B4200E5FAFE /* NNLunchControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNLunchControl.h; sourceTree = "<group>"; };
 		86F9B6D111476B4200E5FAFE /* NNLunchControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNLunchControl.m; sourceTree = "<group>"; };
 		86F9B6DF114771E300E5FAFE /* NNRestaurant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNRestaurant.h; sourceTree = "<group>"; };
@@ -65,6 +71,8 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				46B5E45D115FEAED006C44F8 /* NNNetworkSync.h */,
+				46B5E45E115FEAED006C44F8 /* NNNetworkSync.m */,
 				86F9B6E31147730400E5FAFE /* NNPerson.h */,
 				86F9B6E41147730400E5FAFE /* NNPerson.m */,
 				86F9B6DF114771E300E5FAFE /* NNRestaurant.h */,
@@ -120,6 +128,8 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				46B5E4D11160002D006C44F8 /* AsyncSocket.h */,
+				46B5E4D21160002D006C44F8 /* AsyncSocket.m */,
 				86F9B71211478CC300E5FAFE /* NNLStatics.h */,
 				32CA4F630368D1EE00C91783 /* lunchd_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
@@ -215,6 +225,8 @@
 				86F9B6E51147730400E5FAFE /* NNPerson.m in Sources */,
 				46B5E139115CA479006C44F8 /* NNSlidingStackView.m in Sources */,
 				46B5E170115CAA03006C44F8 /* NNRestaurantView.m in Sources */,
+				46B5E45F115FEAED006C44F8 /* NNNetworkSync.m in Sources */,
+				46B5E4D31160002D006C44F8 /* AsyncSocket.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

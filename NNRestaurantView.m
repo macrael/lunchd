@@ -108,3 +108,77 @@
 }
 
 @end
+
+
+@implementation NNPersonView
+
+- (id)initWithFrame:(NSRect)frame andController:(id)controller{
+    self = [super initWithFrame:frame];
+    if (self) {
+		NSLog(@"I HAVE BEEN Cratered");
+		[self setAutoresizingMask:NSViewWidthSizable];
+		
+		NSRect aFrame;
+		
+		aFrame.origin = (NSPoint){ 30, 15};
+		aFrame.size = (NSSize){140,25};		
+		nameField = [[NSTextField alloc] initWithFrame:aFrame];
+		[nameField setBordered:NO];
+		[nameField setEditable:NO];
+		[nameField setDrawsBackground:NO];
+		[nameField setStringValue:@"NO NAME YET"];
+		
+		[self addSubview:nameField];
+		
+	}
+    return self;
+}
+
+- (void)setRepresentedPerson:(NNRestaurant *)person
+{
+	if (representedPerson == person){
+		return;
+	}
+	[representedPerson release];
+	representedPerson = [person retain];
+	
+	[representedPerson addObserver:self
+							forKeyPath:@"state"
+							   options:0
+							   context:NULL];
+	[self updateState];
+}
+
+- (NNRestaurant *)representedPerson
+{
+	return representedPerson;
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+					  ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context
+{
+	NSLog(@"KEYPATH CHANGE");
+    if ([keyPath isEqual:@"state"]) {
+		[self updateState];
+    }else{
+		[super observeValueForKeyPath:keyPath
+							 ofObject:object
+							   change:change
+							  context:context];
+	}
+}
+
+- (void)updateState
+{
+	if (!representedPerson){
+		NSLog(@"NOTHING TO UPDATE WITH?");
+	}
+	
+	[nameField setStringValue:[representedPerson name]];
+	int state = [representedPerson state];
+	NSLog(@"Person %@ has state %d",[representedPerson name],state);
+}
+
+@end

@@ -23,9 +23,29 @@
 		[self setName:newName];
 		[self setState:NNUndefinedState];
 		[self setVeto:nil];
-		[self setVotes:nil];
+		votes = [[NSMutableArray alloc] initWithCapacity:5];
 	}
 	return self;
+}
+
+- (void)voteFor:(NSString *)restaurant
+{
+	if ([votes containsObject:restaurant]){
+		NSLog(@"ERROR? VOTE TWICE?");
+	}
+	if ([veto isEqualToString:restaurant]){
+		NSLog(@"ERROR? Vote FOR VETO?");
+	}
+	
+	[votes addObject:restaurant];
+}
+
+- (void)giveVeto:(NSString *)restaurant
+{
+	if (! [veto isEqual: nil]){
+		NSLog(@"ERROR, CAN't GIVE 2 VETOS");
+	}
+	[self setVeto:restaurant];
 }
 
 @end

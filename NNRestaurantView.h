@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "NNRestaurant.h"
+#import "NNPerson.h"
 
 
 @interface NNRestaurantView : NSView {
@@ -21,6 +22,23 @@
 
 - (void)setRepresentedRestaurant:(NNRestaurant *)restaurant;
 - (NNRestaurant *)representedRestaurant;
+
+//This takes the state in the object and redraws.
+//gets called by observing the votes attribute on the represented restaurant
+- (void)updateState;
+
+
+@end
+
+
+@interface NNPersonView : NSView {
+	NSTextField *nameField;
+	NNPerson *representedPerson;
+}
+- (id)initWithFrame:(NSRect)frame andController:(id)controller;
+
+- (void)setRepresentedPerson:(NNPerson *)person;
+- (NNPerson *)representedPerson;
 
 //This takes the state in the object and redraws.
 //gets called by observing the votes attribute on the represented restaurant
