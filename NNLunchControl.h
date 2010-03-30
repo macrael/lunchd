@@ -22,6 +22,8 @@
 	NSMutableArray *restaurants;
 	NNPerson *mePerson;
 	
+	NSMutableArray *restaurantList;
+	
 	//YOU
 	NSString *myName;
 	BOOL usedVeto;
@@ -53,6 +55,7 @@
 - (void)dealWithMessage:(NNNMessage *)message;
 
 - (NSArray *)rightDiffBetweenArray:(NSArray *)array1 andArray:(NSArray *)array2;
+- (id)objectWithName:(NSString *)name fromArray:(NSArray *)array;
 
 //- (NSMenu *)applicationDockMenu:(NSApplication *)sender;
 

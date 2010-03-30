@@ -97,10 +97,14 @@
 	
 	[nameField setStringValue:[representedRestaurant name]];
 	int votes = [representedRestaurant votes];
-	if (votes == -1){
+	if (votes <= -1){
 		[vetoButton setEnabled:NO];
 		[voteButton setEnabled:NO];
 		[nameField setTextColor:[NSColor grayColor]];
+	}else {
+		[vetoButton setEnabled:YES];
+		[voteButton setEnabled:YES];
+		[nameField setTextColor:[NSColor blackColor]];
 	}
 	if ([representedRestaurant hasYourVote]){
 		[voteButton setEnabled:NO];
@@ -134,7 +138,7 @@
     return self;
 }
 
-- (void)setRepresentedPerson:(NNRestaurant *)person
+- (void)setRepresentedPerson:(NNPerson *)person
 {
 	if (representedPerson == person){
 		return;
@@ -149,7 +153,7 @@
 	[self updateState];
 }
 
-- (NNRestaurant *)representedPerson
+- (NNPerson *)representedPerson
 {
 	return representedPerson;
 }
@@ -178,6 +182,15 @@
 	
 	[nameField setStringValue:[representedPerson name]];
 	int state = [representedPerson state];
+	if (state == NNNotComingState){
+		[nameField setTextColor:[NSColor grayColor]];
+	}
+	if (state == NNComingState) {
+		[nameField setTextColor:[NSColor greenColor]];
+	}
+	if (state == NNUndefinedState){
+		[nameField setTextColor:[NSColor blackColor]];
+	}
 	NSLog(@"Person %@ has state %d",[representedPerson name],state);
 }
 

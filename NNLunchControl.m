@@ -30,6 +30,7 @@
 		
 		people = [[NSMutableArray alloc] init];
 		restaurants = [[NSMutableArray alloc] init];
+		restaurantList = [[NSMutableArray alloc] init];
 	}
 	return self;
 }
@@ -88,6 +89,10 @@
 	[rView setRepresentedRestaurant:r];
 	[restaurantSSView addArrangedSubview:rView];
 	//we always add to the bottom, then when things are changed, it updates?
+	[restaurantList addObject:name];
+	
+	[self updateRestaurantPosition:r];
+	
 	return r;
 }
 
@@ -98,6 +103,8 @@
 	NNPersonView *pView = [[NNPersonView alloc] initWithFrame:NSMakeRect(0, 0, 300, 60) andController:self];
 	[pView setRepresentedPerson:p];
 	[personSSView addArrangedSubview:pView];
+	
+	[self updatePersonPosition:p];
 	
 	return p;
 }
@@ -150,7 +157,7 @@
 		[restaurants insertObject:restaurant atIndex:0];
 		
 		[restaurantSSView slideViewAtIndex:curIndex toIndex:0];
-	}else if ([restaurant votes] == -1) {
+	}else if ([restaurant votes] <= -1) {
 		//move to the bottom. 
 		if (curIndex == [restaurants count] -1){
 			return;
@@ -182,7 +189,7 @@
 
 - (void)updatePersonPosition:(NNPerson *)person
 {
-	
+	NSLog(@"UNIMPLEMENTED person position updateing");
 }
 
 - (void)checkInWithAll:(id)sender
@@ -205,18 +212,78 @@
 		thePerson = [self createNewPersonWithName:personName];
 	}
 	//check and see if they are coming, and if that matches. 
+	
+	//If they are not coming, remove their current stuff from the thing.
+	if ([thePerson state] != [message state]){
+		if ([message state] == NNNotComingState){
+			for (NSString *restName in [thePerson votes]){
+				NNRestaurant *rest = [self objectWithName:restName fromArray:restaurants];
+				[rest setVotes:[rest votes] - 1];
+				[self updateRestaurantPosition:rest];
+			}
+			[thePerson setVotes:nil];
+			NNRestaurant *vRest = [self objectWithName:[thePerson veto] fromArray:restaurants];
+			[vRest setVotes:[vRest votes] +1];
+			[thePerson setVeto:nil];
+			[self updateRestaurantPosition:vRest];
+			
+			[thePerson setState:[message state]];
+			[self updatePersonPosition:thePerson];
+			
+			
+			NNRestaurant *rio = [self objectWithName:@"Rio" fromArray:restaurants];
+			NSLog(@"RIO IS? %d",[rio votes]);
+			
+			return;
+		}
+	}
+	
+	
+	
 	if ([thePerson state] != [message state]){
 		[thePerson setState:[message state]];
 		[self updatePersonPosition:thePerson];
 	}
 	
+	//TODO: Optimization, might should have a dictionary of names to objects instead of just arrays. (how preserve ordering? Don't worry about it?)
+	
 	//get thir list and see if they have anything you don't have.
-	
-	
+	NSArray *newRestaurants = [self rightDiffBetweenArray:restaurantList andArray:[message restaurantList]];
+	for (NSString *rest in newRestaurants){
+		[self createNewRestaurantWithName:rest];
+	}
 	
 	//go through all their votes and if they have new ones, update those restaurats and display them. 
+	NSArray *newVotes = [self rightDiffBetweenArray:[thePerson votes] andArray:[message votes]];
+	for (NSString *vote in newVotes){
+		for (NNRestaurant *rest in restaurants){
+			if ([[rest name] isEqualToString:vote]){
+				if ([rest votes] <= -1){
+					//Actually, this is probably OK. again, should be delegated to the object itself. 
+					NSLog(@"Woah there, you shouldn't be voting for something that is vetoed. When you get my info that it is vetoed, that will be good.");
+				} else {
+					[rest setVotes:[rest votes] + 1];
+					[self updateRestaurantPosition:rest];
+				}
+				break;
+			}
+		}
+	}
+	[thePerson setVotes:[NSMutableArray arrayWithArray:[message votes]]];
 	
 	//get their veto and axe a restaurant.
+	for (NNRestaurant *rest in restaurants){
+		if ([[rest name] isEqualToString:[message veto]]){
+			if ([rest votes] >= 0){
+				[rest setVotes:-1];
+			}else {
+				[rest setVotes:[rest votes] -1];
+			}
+			[self updateRestaurantPosition:rest];
+			break;
+		}
+	}
+	[thePerson setVeto:[message veto]];
 	
 }
 
@@ -239,6 +306,16 @@
 	return theDiff;
 }
 
+- (id)objectWithName:(NSString *)name fromArray:(NSArray *)array
+{
+	for (id obj in array){
+		if ([[obj name] isEqualToString:name]){
+			return obj;
+		}
+	}
+	return nil;
+}
+
 
 - (IBAction)debugButtonClick:(id)sender
 {
@@ -248,7 +325,7 @@
 		NNNMessage *message = [[NNNMessage alloc] init];
 		[message setTag:0];
 		[message setName:@"Henry Taggart"];
-		[message setState:1];
+		[message setState:NNUndefinedState];
 		[message setVeto:@"Rio"];
 		[message setVotes:[NSArray arrayWithObjects:@"BBQ",@"Thai Pepper",nil]];
 		[message setRestaurantList:[NSArray arrayWithObjects:@"Cafe Macs",@"Wahoo's",@"In'n'out",
@@ -260,11 +337,19 @@
 		NNNMessage *message = [[NNNMessage alloc] init];
 		[message setTag:0];
 		[message setName:@"James Dempsy"];
-		[message setState:1];
+		[message setState:NNComingState];
 		[message setVeto:@"BBQ"];
 		[message setVotes:[NSArray arrayWithObjects:@"In'n'out",@"Thai Pepper",nil]];
 		[message setRestaurantList:[NSArray arrayWithObjects:@"Cafe Macs",@"Wahoo's",@"In'n'out",
 									@"Thai Pepper",@"Rio",@"BBQ",nil]];
+		
+		[self dealWithMessage:message];
+	}
+	if (DEBUGS == 2){
+		NNNMessage *message = [[NNNMessage alloc] init];
+		[message setTag:1];
+		[message setName:@"Henry Taggart"];
+		[message setState:NNNotComingState];
 		
 		[self dealWithMessage:message];
 	}

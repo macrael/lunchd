@@ -43,10 +43,11 @@
 }
 - (void)giveVeto
 {
-	if (votes == -1){
-		NSLog(@"ERROR: Shouldn't be vetoing an already vetoed place.");
+	if (votes >= 0){
+		[self setVotes:-1];
+	}else {
+		[self setVotes: votes - 1];
 	}
-	[self setVotes:-1];
 }
 
 - (id)copyWithZone:(NSZone *)zone

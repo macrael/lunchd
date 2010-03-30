@@ -11,7 +11,8 @@
 
 @interface NNRestaurant : NSObject <NSCopying> {
 	NSString *name;
-	int votes;		//-1 for vetoed, 0 for neutral, + for number?
+	int votes;		//- for vetoes, 0 for neutral, + for number?  BADBAD if you unveto, you lose the votes. 
+	int vetos;		//TODO use vetos count instead. just increment and decrement. if it is greater than zero, you have a veto. 
 	BOOL hasYourVote;
 }
 
