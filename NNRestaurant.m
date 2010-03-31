@@ -12,7 +12,8 @@
 
 @synthesize name;
 @synthesize votes;
-@synthesize hasYourVote;
+@synthesize vetos;
+@synthesize state;
 
 - (id)initWithName:(NSString *)theName
 {
@@ -20,7 +21,8 @@
 	if (self){
 		[self setName:theName];
 		[self setVotes:0];
-		[self setHasYourVote:NO];
+		[self setVetos:0];
+		[self setState:NNUndefinedState];
 	}
 	return self;
 }
@@ -33,20 +35,37 @@
 
 - (void)giveVote
 {
-	//right now can give infinite votes.
-	if (votes >=0 && !hasYourVote){
-		[self setHasYourVote:YES];
-		[self setVotes: votes + 1];
-	}else {
-		NSLog(@"ERROR: Shouldn't be voting for this place.");
+	[self setVotes:votes +1];
+	if (vetos == 0 && votes == 1){
+		[self setState:NNVotedForState];
 	}
 }
+
+- (void)takeVote
+{
+	[self setVotes:votes -1];
+	if (vetos == 0 && votes == 0){
+		[self setState:NNUndefinedState];
+	}
+}
+
 - (void)giveVeto
 {
-	if (votes >= 0){
-		[self setVotes:-1];
-	}else {
-		[self setVotes: votes - 1];
+	[self setVetos:vetos +1];
+	if (vetos == 1){
+		[self setState:NNVetoedState];
+	}
+}
+
+- (void)takeVeto
+{
+	[self setVetos:vetos -1];
+	if (vetos == 0){
+		if (votes == 0){
+			[self setState:NNUndefinedState];
+		}else {
+			[self setState:NNVotedForState];
+		}
 	}
 }
 
@@ -54,6 +73,7 @@
 {
 	NNRestaurant *copiedRest = [[[self class] allocWithZone:zone] initWithName:[[self name] copy]];
 	[copiedRest setVotes:[self votes]];
+	[copiedRest setVetos:[self vetos]];
 	return copiedRest;
 }
 

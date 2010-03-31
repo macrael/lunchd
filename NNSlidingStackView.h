@@ -21,7 +21,7 @@
 - (void)addArrangedSubview:(NSView *)subView;
 - (void)insertArrangedSubview:(NSView *)subView atIndex:(int)index;
 - (void)slideViewAtIndex:(int)startIndex toIndex:(int)endIndex;
-
+- (void)updateAll;
 
 
 @end

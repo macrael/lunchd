@@ -45,6 +45,12 @@
 	
 }
 
+- (void)insertArrangedSubview:(NSView *)subView atIndex:(int)index
+{
+	[self addArrangedSubview:subView];
+	[self slideViewAtIndex:[arrangedSubViews count]-1 toIndex:index];
+}
+
 - (void)drawRect:(NSRect)rect
 {
 	//NSLog(@"Drawing RecT!: %@",[NSValue valueWithRect:rect]);
@@ -82,35 +88,6 @@
 	NSView *mommaView = [arrangedSubViews objectAtIndex:startIndex];
 	
 	NSRect aRect = [mommaView frame];
-//	aRect.origin.y = endIndex * stripeHeight;
-//	[[mommaView animator] setFrame:aRect];
-	
-//	int i, bottomIndex;
-//	BOOL shiftDown;
-//	
-//	if (startIndex > endIndex){
-//		i = endIndex;
-//		bottomIndex = startIndex -1;
-//		shiftDown = YES;
-//	}else {
-//		i = startIndex + 1;
-//		bottomIndex = endIndex;
-//		shiftDown = NO;
-//	}
-//	
-//	for (i; i <= bottomIndex; i ++){
-//		NSView *babyView = [arrangedSubViews objectAtIndex:i];
-//		int newIndex;
-//		if (shiftDown){
-//			newIndex = i + 1;
-//		}else {
-//			newIndex = i -1;
-//		}
-//		
-//		aRect.origin.y = newIndex * stripeHeight;
-//		[[babyView animator] setFrame:aRect];
-//
-//	}
 	
 	//Right now we are giving no special treatment to the moved, could probably throw it in.
 	[arrangedSubViews removeObjectAtIndex:startIndex];
@@ -130,6 +107,13 @@
 		[[babyView animator] setFrame:aRect];
 	}
 	
+}
+
+- (void)updateAll
+{
+	for (NSView *view in arrangedSubViews){
+		[view updateState];
+	}
 }
 
 @end

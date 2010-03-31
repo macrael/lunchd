@@ -9,6 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "NNRestaurant.h"
 #import "NNPerson.h"
+#import "NNLunchControl.h"
 
 
 @interface NNRestaurantView : NSView {
@@ -16,6 +17,7 @@
 	NSButton *voteButton;
 	NSButton *vetoButton;
 	
+	NNPerson *mePerson;
 	NNRestaurant *representedRestaurant;
 }
 - (id)initWithFrame:(NSRect)frame andController:(id)controller;

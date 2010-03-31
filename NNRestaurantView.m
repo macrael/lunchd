@@ -11,7 +11,7 @@
 
 @implementation NNRestaurantView
 
-- (id)initWithFrame:(NSRect)frame andController:(id)controller{
+- (id)initWithFrame:(NSRect)frame andController:(NNLunchControl *)controller{
     self = [super initWithFrame:frame];
     if (self) {
 		NSLog(@"I HAVE BEEN Cratered");
@@ -49,6 +49,8 @@
 		[self addSubview:voteButton];
 		[self addSubview:vetoButton];
 		
+		mePerson = [controller mePerson];
+		
 	}
     return self;
 }
@@ -62,7 +64,7 @@
 	representedRestaurant = [restaurant retain];
 	
 	[representedRestaurant addObserver:self
-							forKeyPath:@"votes"
+							forKeyPath:@"state"
 							   options:0
 							   context:NULL];
 	[self updateState];
@@ -79,7 +81,7 @@
                        context:(void *)context
 {
 	NSLog(@"KEYPATH CHANGE");
-    if ([keyPath isEqual:@"votes"]) {
+    if ([keyPath isEqual:@"state"]) {
 		[self updateState];
     }else{
 		[super observeValueForKeyPath:keyPath
@@ -96,8 +98,8 @@
 	}
 	
 	[nameField setStringValue:[representedRestaurant name]];
-	int votes = [representedRestaurant votes];
-	if (votes <= -1){
+	int state = [representedRestaurant state];
+	if (state == NNVetoedState){
 		[vetoButton setEnabled:NO];
 		[voteButton setEnabled:NO];
 		[nameField setTextColor:[NSColor grayColor]];
@@ -106,8 +108,18 @@
 		[voteButton setEnabled:YES];
 		[nameField setTextColor:[NSColor blackColor]];
 	}
-	if ([representedRestaurant hasYourVote]){
+	if (state == NNVotedForState){
+		[nameField setTextColor:[NSColor greenColor]];
+	}
+	if ([[mePerson votes] containsObject:[representedRestaurant name]]){
 		[voteButton setEnabled:NO];
+	}
+	if ([mePerson veto] != nil){
+		[vetoButton setEnabled:NO];
+	}
+	if ([mePerson state] == NNNotComingState){
+		[voteButton setEnabled:NO];
+		[vetoButton setEnabled:NO];
 	}
 }
 

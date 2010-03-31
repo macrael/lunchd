@@ -14,7 +14,7 @@
 #import "NNNetworkSync.h"
 
 
-@interface NNLunchControl : NSObject {\
+@interface NNLunchControl : NSObject {
 	IBOutlet NNSlidingStackView *restaurantSSView;
 	IBOutlet NNSlidingStackView *personSSView;
 	
@@ -26,13 +26,13 @@
 	
 	//YOU
 	NSString *myName;
-	BOOL usedVeto;
 	
 	int DEBUGS;
 }
 
 @property (retain) NSMutableArray *restaurants;
 @property (retain) NSMutableArray *people;
+@property (retain) NNPerson *mePerson;
 
 //- (void)addRestaurant:(NSString *)newRestaurant;
 
@@ -54,6 +54,7 @@
 
 - (void)dealWithMessage:(NNNMessage *)message;
 
+- (void)extricatePerson:(NNPerson *)thePerson;
 - (NSArray *)rightDiffBetweenArray:(NSArray *)array1 andArray:(NSArray *)array2;
 - (id)objectWithName:(NSString *)name fromArray:(NSArray *)array;
 
