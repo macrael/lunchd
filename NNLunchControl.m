@@ -49,6 +49,12 @@
 {
 	NSLog(@"I HAVE AWOKEN");
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	
+	if ([mePerson name] == nil) {
+		[self setTopView:whoView];
+	}else {
+		[self setTopView:inOrOutView];
+	}
 
 	//lets try putting a new view in the view. 
 	NSArray *resturantNames = [defaults arrayForKey:@"restaurants"];
@@ -57,20 +63,35 @@
 	}
 }
 
+- (IBAction)enterYourName:(id)sender
+{
+	[mePerson setName:[nameField stringValue]];
+	[self setTopView:inOrOutView];
+	[restaurantSSView updateAll];
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	[defaults setObject:[nameField stringValue] forKey:@"name"];
+}
+
+
+- (void)setTopView:(NSView *)newView
+{
+	[currentTopView removeFromSuperview];
+	
+	NSRect frame = [[theWindow contentView] bounds];
+	frame.origin.x = 0;
+	frame.origin.y = frame.size.height - [newView bounds].size.height;
+	frame.size.height = [newView bounds].size.height;
+	
+	[newView setFrame:frame];
+	
+	[[theWindow contentView] addSubview:newView];
+	currentTopView = newView;
+}
+
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
 	NSLog(@"GAMEON");
-	
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	if ([defaults stringForKey:@"name"]  == NULL){
-		//setup getting the name. 
-		NSLog(@"NO NAME YET, SETTING TO MACRAE");
-		[defaults setObject:@"MacRae" forKey:@"name"];
-	}
-	
-	
-	
-	[mePerson setName:[defaults stringForKey:@"name"]];
 	
 	//This may need to be synced. Otherwise you could restart the app and use 
 	//your veto over and over again.
@@ -152,6 +173,7 @@
 	NSLog(@"YOU ARE IN");
 	[mePerson setState:NNComingState];
 	[restaurantSSView updateAll];
+	[self setTopView:ininView];
 }
 - (IBAction)imOut:(id)sender
 {
@@ -159,6 +181,7 @@
 	[mePerson setState:NNNotComingState];
 	[self extricatePerson:mePerson];
 	[restaurantSSView updateAll];
+	[self setTopView:outoutView];
 }
 
 
@@ -420,8 +443,7 @@
 
 
 - (IBAction)debugButtonClick:(id)sender
-{
-	
+{	
 	//test message:
 	if (DEBUGS == 0){
 		NNNMessage *message = [[NNNMessage alloc] init];

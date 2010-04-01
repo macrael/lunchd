@@ -27,6 +27,17 @@
 	//YOU
 	NSString *myName;
 	
+	//TOP FIELDS
+	NSView *currentTopView;
+	IBOutlet NSView *whoView;
+	IBOutlet NSView *inOrOutView;
+	IBOutlet NSView *ininView;
+	IBOutlet NSView *outoutView;
+	
+	IBOutlet NSWindow *theWindow;
+	
+	IBOutlet NSTextField *nameField;
+	
 	int DEBUGS;
 }
 
@@ -45,6 +56,7 @@
 - (NNRestaurant *)createNewRestaurantWithName:(NSString *)name;
 - (NNPerson *)createNewPersonWithName:(NSString *)name;
 
+- (IBAction)enterYourName:(id)sender;
 
 - (IBAction)voteButtonPress:(id)sender;
 - (IBAction)vetoButtonPress:(id)sender;
@@ -54,6 +66,7 @@
 
 - (void)dealWithMessage:(NNNMessage *)message;
 
+- (void)setTopView:(NSView *)newView;
 - (void)extricatePerson:(NNPerson *)thePerson;
 - (NSArray *)rightDiffBetweenArray:(NSArray *)array1 andArray:(NSArray *)array2;
 - (id)objectWithName:(NSString *)name fromArray:(NSArray *)array;

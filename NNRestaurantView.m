@@ -117,10 +117,11 @@
 	if ([mePerson veto] != nil){
 		[vetoButton setEnabled:NO];
 	}
-	if ([mePerson state] == NNNotComingState){
+	if ([mePerson state] == NNNotComingState || [mePerson name] == nil){
 		[voteButton setEnabled:NO];
 		[vetoButton setEnabled:NO];
 	}
+	NSLog(@"EMEMEMEME: %@",[mePerson name]);
 }
 
 @end
