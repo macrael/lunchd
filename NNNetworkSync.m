@@ -8,9 +8,21 @@
 
 #import "NNNetworkSync.h"
 
-#define LUNCH_SERVICE_PORT 2763
+#define LUNCH_SERVICE_PORT 2764
+
+static const unsigned int MessageHeaderSize = sizeof(UInt64);
+NSTimeInterval SocketTimeout = 30;
 
 @implementation NNNetworkSync
+
+- (id)initWithController:(NNLunchControl *)control
+{
+	self = [super init];
+	if (self) {
+		controller = control;
+	}
+	return self;
+}
 
 - (IBAction)startServer:(id)sender
 {
@@ -27,19 +39,46 @@
     }
 	
     // Advertise service with bonjour
-//    NSString *serviceName = [NSString stringWithFormat:@"Lunchd on %@", 
-//							 [[NSProcessInfo processInfo] hostName]];
-//    netService = [[NSNetService alloc] initWithDomain:@"" 
-//												 type:@"_lunchd._tcp." 
-//												 name:serviceName 
-//												 port:listeningSocket.localPort];
-//    netService.delegate = self;
-//    [netService publish];
+    NSString *serviceName = [NSString stringWithFormat:@"Lunchd on %@", 
+							 [[NSProcessInfo processInfo] hostName]];
+    netService = [[NSNetService alloc] initWithDomain:@"" 
+												 type:@"_lunchd._tcp." 
+												 name:serviceName 
+												 port:2763];
+    netService.delegate = self;
+    [netService publish];
 	
 }
 
+- (void)startSearching
+{
+	netBrowser = [[NSNetServiceBrowser alloc] init];
+	[netBrowser setDelegate:self];
+	[netBrowser searchForServicesOfType:@"_lunchd._tcp." inDomain:@""];
+}
+
+-(void)broadcastMessage:(NNNMessage *)message
+{
+	for (AsyncSocket *sock in connectedSockets){
+		[self sendMessage:message onSocket:sock];
+	}
+}
+
+#pragma mark Sending/Receiving Messages
+-(void)sendMessage:(NNNMessage *)message onSocket:(AsyncSocket*)socket{
+    NSData *messageData = [NSKeyedArchiver archivedDataWithRootObject:message];
+    UInt64 header[1];
+    header[0] = [messageData length]; 
+    header[0] = CFSwapInt64HostToLittle(header[0]);  // Send header in little endian byte order
+    [socket writeData:[NSData dataWithBytes:header length:MessageHeaderSize] withTimeout:SocketTimeout tag:(long)0];
+    [socket writeData:messageData withTimeout:SocketTimeout tag:(long)1];
+}
+
+#pragma mark Socket Delegate Methods.
+
 - (void)onSocket:(AsyncSocket *)sock didAcceptNewSocket:(AsyncSocket *)newSocket
 {
+	NSLog(@"Accepted Socket");
 	[connectedSockets addObject:newSocket];
 }
 
@@ -47,50 +86,43 @@
 {
 	NSLog(@"Accepted client %@:%hu", host, port);
 	
-	//Send no message on accepting. 
+	[self sendMessage:[controller currentMessage] onSocket:sock];
 	
-	//NSString *welcomeMsg = @"Welcome to the AsyncSocket Echo Server\r\n";
-	//NSData *welcomeData = [welcomeMsg dataUsingEncoding:NSUTF8StringEncoding];
-	
-	//[sock writeData:welcomeData withTimeout:-1 tag:0];
-	
-	// We could call readDataToData:withTimeout:tag: here - that would be perfectly fine.
-	// If we did this, we'd want to add a check in onSocket:didWriteDataWithTag: and only
-	// queue another read if tag != WELCOME_MSG.
-	
-	[sock readDataToData:[AsyncSocket CRLFData] withTimeout:-1 tag:1];
+	[sock readDataToLength:MessageHeaderSize withTimeout:SocketTimeout tag:(long)0];
 }
 
-- (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag
-{
-	[sock readDataToData:[AsyncSocket CRLFData] withTimeout:-1 tag:0];
-}
+//- (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag
+//{
+//	[sock readDataToLength:MessageHeaderSize withTimeout:SocketTimeout tag:(long)0];
+//}
 
 - (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
 {
-	NSData *strData = [data subdataWithRange:NSMakeRange(0, [data length] - 2)];
-	NSString *msg = [[[NSString alloc] initWithData:strData encoding:NSUTF8StringEncoding] autorelease];
-	if(msg)
-	{
-		NSLog(@"SERVER REC:%@",msg);
-	}
-	else
-	{
-		NSLog(@"Error converting received data into UTF-8 String");
-	}
-	
-	NSString *responseMsg = @"I AM SERVER\r\n";
-	
-	// Even if we were unable to write the incoming data to the log,
-	// we're still going to echo it back to the client.
-	
-	NSData *responseData = [responseMsg dataUsingEncoding:NSUTF8StringEncoding];
-	[sock writeData:responseData withTimeout:-1 tag:0];
-}
+	if ( tag == 0 ) {
+        // Header
+        UInt64 header = *((UInt64*)[data bytes]);
+        header = CFSwapInt64LittleToHost(header);  // Convert from little endian to native
+        [sock readDataToLength:(CFIndex)header withTimeout:SocketTimeout tag:(long)1];
+    }
+    else if ( tag == 1 ) { 
+        // Message body. Pass to controller
+        if ( controller && [controller respondsToSelector:@selector(dealWithMessage:fromSocket:)] ) {
+            NNNMessage *message = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+            [controller dealWithMessage:message fromSocket:sock];
+        }
+        
+        // Begin listening for next message
+        [sock readDataToLength:MessageHeaderSize withTimeout:SocketTimeout tag:(long)0];
+    }
+    else {
+        NSLog(@"Unknown tag in read of socket data %d", tag);
+    }}
 
 - (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err
 {
 	NSLog(@"Client Disconnected: %@:%hu", [sock connectedHost], [sock connectedPort]);
+	//probably send this to the controller so it can deal with the ramifications.
+	[controller lostConnectionToSocket:sock];
 }
 
 - (void)onSocketDidDisconnect:(AsyncSocket *)sock
@@ -98,86 +130,41 @@
 	[connectedSockets removeObject:sock];
 }
 
-@end
+#pragma mark Net Service Browser Delegate Methods
 
-
-
-
-
-
-
-
-@implementation NNMessageSender
-
-- (IBAction)testServer:(id)sender
+-(void)netServiceBrowser:(NSNetServiceBrowser *)aBrowser didFindService:(NSNetService *)aService moreComing:(BOOL)more
 {
-	NSLog(@"Testing SERVER");
-	
-	AsyncSocket *sendSocket = [[AsyncSocket alloc] initWithDelegate:self];
-	NSError *err;
-	if (! [sendSocket connectToHost:@"192.168.10.101" onPort:LUNCH_SERVICE_PORT error:&err]){
-		NSLog(@"FAILED TO CONNNECT");
-		return;
+	//for now, lets not keep track of services?
+	NSLog(@"FOUND SERVICE!");
+	[aService setDelegate:self];
+	[aService resolveWithTimeout:30];
+	if (!more){
+		NSLog(@"DONE GETTING PEOPLE FOR NOW:");
 	}
+}
+
+-(void)netServiceBrowser:(NSNetServiceBrowser *)aBrowser didRemoveService:(NSNetService *)aService moreComing:(BOOL)more
+{
 	
 }
 
-- (void)onSocket:(AsyncSocket *)sock didAcceptNewSocket:(AsyncSocket *)newSocket
+
+#pragma mark Net SerVice Delegate Methods
+
+-(void)netServiceDidResolveAddress:(NSNetService *)service
 {
-	NSLog(@"ACCEPTED");
+	//Might want to do a check here, if we already know about this address, then they already know about us and there is no need for a second connection.
+	NSError *error;
+	NSLog(@"Resolved Service with addresses %@",[service addresses]);
+	AsyncSocket *sock = [[[AsyncSocket alloc] initWithDelegate:self] autorelease];
+	[sock connectToAddress:[[service addresses] lastObject] error:&error];
 }
 
-- (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
-{
-	NSLog(@"Got server %@:%hu", host, port);
-	
-	NSString *welcomeMsg = @"I AM CLIENT MACRAE\r\n";
-	NSData *welcomeData = [welcomeMsg dataUsingEncoding:NSUTF8StringEncoding];
-	
-	[sock writeData:welcomeData withTimeout:-1 tag:0];
-	
-	// We could call readDataToData:withTimeout:tag: here - that would be perfectly fine.
-	// If we did this, we'd want to add a check in onSocket:didWriteDataWithTag: and only
-	// queue another read if tag != WELCOME_MSG.
-}
-
-- (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag
-{
-	[sock readDataToData:[AsyncSocket CRLFData] withTimeout:-1 tag:0];
-}
-
-- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
-{
-	NSData *strData = [data subdataWithRange:NSMakeRange(0, [data length] - 2)];
-	NSString *msg = [[[NSString alloc] initWithData:strData encoding:NSUTF8StringEncoding] autorelease];
-	if(msg)
-	{
-		NSLog(@"CLIENT REC:%@",msg);
-	}
-	else
-	{
-		NSLog(@"Error converting received data into UTF-8 String");
-	}
-	
-	// Even if we were unable to write the incoming data to the log,
-	// we're still going to echo it back to the client.
-	//[sock writeData:data withTimeout:-1 tag:1];
-	[sock readDataToData:[AsyncSocket CRLFData] withTimeout:-1 tag:0];
-}
-
-- (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err
-{
-	NSLog(@"Client Disconnected: %@:%hu", [sock connectedHost], [sock connectedPort]);
-}
-
-- (void)onSocketDidDisconnect:(AsyncSocket *)sock
-{
-	
+-(void)netService:(NSNetService *)service didNotResolve:(NSDictionary *)errorDict {
+    NSLog(@"Could not resolve: %@", errorDict);
 }
 
 @end
-
-
 
 
 
@@ -194,16 +181,24 @@
 {
 	self = [super init];
 	if (self){
-		[self setAnumber: [aDecoder decodeIntForKey:@"aNumber"]];
-		[self setMessage: [aDecoder decodeObjectForKey:@"message"]];
+		[self setTag:[aDecoder decodeIntForKey:@"tag"]];
+		[self setState:[aDecoder decodeIntForKey:@"state"]];
+		[self setName:[aDecoder decodeObjectForKey:@"name"]];
+		[self setVeto:[aDecoder decodeObjectForKey:@"veto"]];
+		[self setVotes:[aDecoder decodeObjectForKey:@"votes"]];
+		[self setRestaurantList:[aDecoder decodeObjectForKey:@"restaurantList"]];
 	}
 	return self;
 }
 
 - (void) encodeWithCoder:(NSCoder *)aCoder
 {
-	[aCoder encodeInt:[self anumber] forKey:@"aNumber"];
-	[aCoder encodeObject:[self message] forKey:@"message"];
+	[aCoder encodeInt:[self tag] forKey:@"tag"];
+	[aCoder encodeInt:[self state] forKey:@"state"];
+	[aCoder encodeObject:name forKey:@"name"];
+	[aCoder encodeObject:veto forKey:@"veto"];
+	[aCoder encodeObject:votes forKey:@"votes"];
+	[aCoder encodeObject:restaurantList forKey:@"restaurantList"];
 }
 
 @end

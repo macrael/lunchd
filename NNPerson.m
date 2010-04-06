@@ -15,6 +15,7 @@
 @synthesize state;
 @synthesize veto;
 @synthesize votes;
+@synthesize socket;
 
 - (id)initWithName:(NSString *)newName
 {

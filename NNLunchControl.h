@@ -7,12 +7,15 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import <AddressBook/AddressBook.h>
 #import "NNRestaurant.h"
 #import "NNPerson.h"
 #import "NNRestaurantView.h"
 #import "NNSlidingStackView.h"
 #import "NNNetworkSync.h"
 
+@class NNNetworkSync;
+@class NNNMessage;
 
 @interface NNLunchControl : NSObject {
 	IBOutlet NNSlidingStackView *restaurantSSView;
@@ -38,12 +41,17 @@
 	
 	IBOutlet NSTextField *nameField;
 	
+	NSMutableArray *myDefaultRestaurants;
+	
+	NNNetworkSync *networkSync;
+	
 	int DEBUGS;
 }
 
 @property (retain) NSMutableArray *restaurants;
 @property (retain) NSMutableArray *people;
 @property (retain) NNPerson *mePerson;
+@property (retain) NSMutableArray *myDefaultRestaurants;
 
 //- (void)addRestaurant:(NSString *)newRestaurant;
 
@@ -57,6 +65,7 @@
 - (NNPerson *)createNewPersonWithName:(NSString *)name;
 
 - (IBAction)enterYourName:(id)sender;
+- (IBAction)syncUpDefaults:(id)sender;
 
 - (IBAction)voteButtonPress:(id)sender;
 - (IBAction)vetoButtonPress:(id)sender;
@@ -64,7 +73,10 @@
 - (void)updateRestaurantPosition:(NNRestaurant *)restaurant;
 - (void)updatePersonPosition:(NNPerson *)person;
 
-- (void)dealWithMessage:(NNNMessage *)message;
+- (void)dealWithMessage:(NNNMessage *)message fromSocket:(AsyncSocket *)socket;
+- (NNNMessage *)currentMessage;
+- (void)lostConnectionToSocket:(AsyncSocket *)socket;
+- (void)broadcastMessageToAll;
 
 - (void)setTopView:(NSView *)newView;
 - (void)extricatePerson:(NNPerson *)thePerson;
@@ -74,5 +86,14 @@
 //- (NSMenu *)applicationDockMenu:(NSApplication *)sender;
 
 - (IBAction)debugButtonClick:(id)sender;
+
+@end
+
+
+@interface NNRestDef : NSObject {
+	NSString *rName;
+}
+
+@property (retain) NSString *rName;
 
 @end

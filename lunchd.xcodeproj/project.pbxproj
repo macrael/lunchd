@@ -12,6 +12,7 @@
 		46679002115B3DCE00B7C9C2 /* veto_reg.png in Resources */ = {isa = PBXBuildFile; fileRef = 46678FFE115B3DCE00B7C9C2 /* veto_reg.png */; };
 		46679003115B3DCE00B7C9C2 /* vote_press.png in Resources */ = {isa = PBXBuildFile; fileRef = 46678FFF115B3DCE00B7C9C2 /* vote_press.png */; };
 		46679004115B3DCE00B7C9C2 /* vote_reg.png in Resources */ = {isa = PBXBuildFile; fileRef = 46679000115B3DCE00B7C9C2 /* vote_reg.png */; };
+		466EC3AC116B223B008BF20A /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 466EC3AB116B223B008BF20A /* AddressBook.framework */; };
 		46B5E139115CA479006C44F8 /* NNSlidingStackView.m in Sources */ = {isa = PBXBuildFile; fileRef = 46B5E138115CA479006C44F8 /* NNSlidingStackView.m */; };
 		46B5E170115CAA03006C44F8 /* NNRestaurantView.m in Sources */ = {isa = PBXBuildFile; fileRef = 46B5E16F115CAA03006C44F8 /* NNRestaurantView.m */; };
 		46B5E45F115FEAED006C44F8 /* NNNetworkSync.m in Sources */ = {isa = PBXBuildFile; fileRef = 46B5E45E115FEAED006C44F8 /* NNNetworkSync.m */; };
@@ -37,6 +38,7 @@
 		46678FFE115B3DCE00B7C9C2 /* veto_reg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = veto_reg.png; path = resources/veto_reg.png; sourceTree = "<group>"; };
 		46678FFF115B3DCE00B7C9C2 /* vote_press.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = vote_press.png; path = resources/vote_press.png; sourceTree = "<group>"; };
 		46679000115B3DCE00B7C9C2 /* vote_reg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = vote_reg.png; path = resources/vote_reg.png; sourceTree = "<group>"; };
+		466EC3AB116B223B008BF20A /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		46B5E137115CA479006C44F8 /* NNSlidingStackView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNSlidingStackView.h; sourceTree = "<group>"; };
 		46B5E138115CA479006C44F8 /* NNSlidingStackView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNSlidingStackView.m; sourceTree = "<group>"; };
 		46B5E16E115CAA03006C44F8 /* NNRestaurantView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNRestaurantView.h; sourceTree = "<group>"; };
@@ -62,6 +64,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
+				466EC3AC116B223B008BF20A /* AddressBook.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,6 +94,7 @@
 			isa = PBXGroup;
 			children = (
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+				466EC3AB116B223B008BF20A /* AddressBook.framework */,
 			);
 			name = "Linked Frameworks";
 			sourceTree = "<group>";

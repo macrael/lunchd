@@ -8,27 +8,24 @@
 
 #import <Cocoa/Cocoa.h>
 #import "AsyncSocket.h"
+#import "NNLunchControl.h"
 
+@class NNNMessage;
+@class NNLunchControl;
 
 @interface NNNetworkSync : NSObject {
 	AsyncSocket *listeningSocket;
+	NNLunchControl *controller;
 	NSNetService *netService;
+	NSNetServiceBrowser *netBrowser;
 	NSMutableArray *connectedSockets;
 }
-
+- (id)initWithController:(NNLunchControl *)control;
 - (IBAction)startServer:(id)sender;
+- (void)startSearching;
+- (void)sendMessage:(NNNMessage *)message onSocket:(AsyncSocket*)socket;
 
 @end
-
-
-@interface NNMessageSender : NSObject{
-	
-}
-
-- (IBAction)testServer:(id)sender;
-
-@end
-
 
 
 @interface NNNMessage : NSObject <NSCoding> {

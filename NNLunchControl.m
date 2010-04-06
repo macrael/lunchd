@@ -14,6 +14,7 @@
 @synthesize restaurants;
 @synthesize people;
 @synthesize mePerson;
+@synthesize myDefaultRestaurants;
 
 - (id) init
 {
@@ -29,17 +30,32 @@
 		
 		[defaults registerDefaults:appDefaults];
 		
+		
+		NSMutableArray *defTemp = [[NSMutableArray alloc] initWithCapacity:5];
+		for (NSString *restN in [defaults objectForKey:@"restaurants"]){
+			NNRestDef *tmp = [[NNRestDef alloc] init];
+			[tmp setRName:restN];
+			[defTemp addObject:tmp];
+		}
+		[self setMyDefaultRestaurants:defTemp];
+		
 		mePerson = [[NNPerson alloc] initWithName:[defaults stringForKey:@"name"]];
 		
 		people = [[NSMutableArray alloc] init];
 		restaurants = [[NSMutableArray alloc] init];
 		restaurantList = [[NSMutableArray alloc] init];
+		
+		networkSync = [[NNNetworkSync alloc] initWithController:self];
+		[networkSync startServer:self];
+		[networkSync startSearching];
+		
 	}
 	return self;
 }
 
 - (void) dealloc
 {
+	[myDefaultRestaurants release];
 	[people release];
 	[restaurants release];
 	[super dealloc];
@@ -52,6 +68,13 @@
 	
 	if ([mePerson name] == nil) {
 		[self setTopView:whoView];
+		ABPerson *aPerson = [[ABAddressBook sharedAddressBook] me];
+		NSString *nameGuess = [aPerson valueForProperty:kABFirstNameProperty];
+		NSLog(@"YOUR NAME IS %@",nameGuess);
+		[nameField setStringValue:nameGuess];
+		[nameField selectText:self];
+		NSLog(@"DID I CHANGE THE VALUE: %@",[mePerson name]);
+
 	}else {
 		[self setTopView:inOrOutView];
 	}
@@ -61,6 +84,25 @@
 	for (NSString *rName in resturantNames){
 		[self createNewRestaurantWithName:rName];
 	}
+}
+
+- (IBAction)syncUpDefaults:(id)sender
+{
+	NSLog(@"SYNCING");
+	NSMutableArray *defRests = [[NSMutableArray alloc] initWithCapacity:5];
+	for (NNRestDef *rd in myDefaultRestaurants){
+		if ([rd rName]) {
+			[defRests addObject:[rd rName]];
+		}
+	}
+	NSArray *newRests = [self rightDiffBetweenArray:restaurantList andArray:defRests];
+	for (NSString *name in newRests){
+		[self createNewRestaurantWithName:name];
+	}
+	
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	[defaults setObject:defRests forKey:@"restaurants"];
+	
 }
 
 - (IBAction)enterYourName:(id)sender
@@ -341,9 +383,17 @@
 	[thePerson setVeto:nil];
 }
 
-- (void)dealWithMessage:(NNNMessage *)message
+
+///////--------
+
+- (void)dealWithMessage:(NNNMessage *)message fromSocket:(AsyncSocket *)socket
 {
 	NSString *personName = [message name];
+	if (personName == nil){
+		//This way, if you sent out before you had a name, nothing is recorded.
+		//could error check here for if there is any other info, shouldln't be able to send any. 
+		return;
+	}
 	NNPerson *thePerson = nil;
 	for (NNPerson *person in people){
 		if ([[person name] isEqualToString:personName]){
@@ -353,6 +403,21 @@
 	if (thePerson == nil){
 		//create new person and add it to people. 
 		thePerson = [self createNewPersonWithName:personName];
+		[thePerson setSocket:socket];
+	}else {
+		//check and see if sockets match;
+		BOOL isEq = [thePerson socket] == socket;
+		if (isEq){
+			NSLog(@"Sockets are literally equal");
+		}else {
+			NSLog(@"SOCKETS ARE NOT LITERALLY EQ");
+		}
+		isEq = [[thePerson socket] isEqual:socket];
+		if (isEq){
+			NSLog(@"Sockets Are EQUAL!");
+		}else {
+			NSLog(@"Sockets are NOT EQLA??");
+		}
 	}
 	//check and see if they are coming, and if that matches. 
 	
@@ -401,7 +466,7 @@
 }
 
 
-- (NNNMessage *)generateMessage
+- (NNNMessage *)currentMessage
 {
 	NNNMessage *message = [[NNNMessage alloc] init];
 	[message setName:[mePerson name]];
@@ -411,6 +476,28 @@
 	[message setRestaurantList:restaurantList];
 	
 	return message;
+}
+
+
+- (void)lostConnectionToSocket:(AsyncSocket *)socket
+{
+	for (NNPerson *person in people){
+		if ([[person socket] isEqual:socket]){
+			[person setState:NNNotComingState];
+			[person setSocket:nil];
+			[self extricatePerson:person];
+			return;
+		}
+	}
+}
+- (void)broadcastMessageToAll
+{
+	NNNMessage *msg = [self currentMessage];
+	
+	
+	for (NNPerson *person in people){
+		[networkSync sendMessage:msg onSocket:[person socket]];
+	}
 }
 
 
@@ -455,7 +542,7 @@
 		[message setRestaurantList:[NSArray arrayWithObjects:@"Cafe Macs",@"Wahoo's",@"In'n'out",
 									@"Thai Pepper",@"Rio",@"BBQ",@"Hardee's",nil]];
 		
-		[self dealWithMessage:message];
+		[self dealWithMessage:message fromSocket:nil];
 	}
 	if (DEBUGS == 1){
 		NNNMessage *message = [[NNNMessage alloc] init];
@@ -467,7 +554,7 @@
 		[message setRestaurantList:[NSArray arrayWithObjects:@"Cafe Macs",@"Wahoo's",@"In'n'out",
 									@"Thai Pepper",@"Rio",@"BBQ",nil]];
 		
-		[self dealWithMessage:message];
+		[self dealWithMessage:message fromSocket:nil];
 	}
 	if (DEBUGS == 2){
 		NNNMessage *message = [[NNNMessage alloc] init];
@@ -475,7 +562,7 @@
 		[message setName:@"Henry Taggart"];
 		[message setState:NNNotComingState];
 		
-		[self dealWithMessage:message];
+		[self dealWithMessage:message fromSocket:nil];
 	}
 	if (DEBUGS == 3){
 		NNNMessage *message = [[NNNMessage alloc] init];
@@ -483,17 +570,42 @@
 		[message setName:@"Kimo Sabe"];
 		[message setState:NNNotComingState];
 		
-		[self dealWithMessage:message];
+		[self dealWithMessage:message fromSocket:nil];
 	}
 	
 	if (DEBUGS == 4){
-		NNNMessage *message = [self generateMessage];
+		NNNMessage *message = [self currentMessage];
 		NSLog(@"ME:\nname:%@\nstate:%d\nvotes:%@\nveto:%@",[message name],[message state],[message votes],[message veto]);
 	}
 	
 	DEBUGS ++;
 	
 	NSLog(@"DONE WITH DEBUG DEAL");
+}
+
+@end
+
+@implementation NNRestDef
+
+- (NSString *)rName
+{
+	return rName;
+}
+
+- (void)setRName:(NSString *)newName
+{
+	[newName retain];
+	[rName release];
+	rName = newName;
+	
+	[[[NSApplication sharedApplication] delegate] syncUpDefaults:self];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+	NNRestDef *copy = [[NNRestDef allocWithZone:zone] init];
+	[copy setRName: [self rName]];
+	return copy;
 }
 
 @end
