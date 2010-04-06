@@ -364,9 +364,10 @@
 	
 }
 
-- (void)checkInWithAll:(id)sender
+- (void)playWhoAreYou:(id)sender
 {
-	NSLog(@"CHEKING IN");
+	NSSound *whoareyou = [NSSound soundNamed:@"whoareyou"];
+	[whoareyou play];
 }
 
 

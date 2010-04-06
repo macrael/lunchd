@@ -59,7 +59,7 @@
 - (IBAction)imOut:(id)sender;
 
 
-- (void)checkInWithAll:(id)sender;
+- (void)playWhoAreYou:(id)sender;
 
 - (NNRestaurant *)createNewRestaurantWithName:(NSString *)name;
 - (NNPerson *)createNewPersonWithName:(NSString *)name;
