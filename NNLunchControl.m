@@ -120,11 +120,13 @@
 
 - (IBAction)enterYourName:(id)sender
 {
-	[mePerson setName:[nameField stringValue]];
-	[self setTopView:inOrOutView];
+	[mePerson setName:[sender stringValue]];
+	if (currentTopView == whoView){
+		[self setTopView:inOrOutView];
+	}
 	[restaurantSSView updateAll];
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	[defaults setObject:[nameField stringValue] forKey:@"name"];
+	[defaults setObject:[sender stringValue] forKey:@"name"];
 	[self broadcastMessageToAll];
 }
 
@@ -295,6 +297,7 @@
 - (void)endGame:(NSString *)winningName
 {
 	NSLog(@"GAME IS OVER> WINNDER> %@",winningName);
+	[mePerson setGameIsOver:YES];
 	if (endChoice){
 		if ([winningName isEqualToString:endChoice]){
 			return;
@@ -302,14 +305,16 @@
 		NSLog(@"WEIRD< SHOULDn't already have a choice");
 	}
 	endChoice = [winningName copy];
-	//What happens if you are not going?
+	
 	NNRestaurant *chosenRest = [self objectWithName:endChoice fromArray:restaurants];
-	//highlight one random choice. move it to the top.
 	[chosenRest setState:NNChosenState];
 	[self updateRestaurantPosition:chosenRest];
-	//change the top view to say: "time to go"
-	
+	//change the top view to say: "time to go!"
 	[restaurantSSView updateAll];
+	
+	//if the view is hidden, bring it to front? Or just assume people will find one another?
+	
+	//Need to change the top view, still need to be able to say you are coming or not coming or have changed your mind.
 }
 
 // Restraunts
@@ -508,6 +513,11 @@
 		thePerson = [self createNewPersonWithName:personName];
 		[thePerson setHost:[socket connectedHost]];
 	}else {
+		if (![[thePerson name] isEqualToString:personName]){
+			NSLog(@"NEW NAME FOR THIS GUY");
+			[thePerson setName:personName];
+			[personSSView updateAll];
+		}
 		if ([thePerson host] == nil){
 			NSLog(@"THIS SHOULD NEVER HAPPEN< THE PERSON HAS TO HAVE A HOST>");
 		}
@@ -624,6 +634,24 @@
 		}
 	}
 }
+
+//-------- NSApplicationDelegate
+- (void)applicationWillBecomeActive:(NSNotification *)aNotification
+{
+	if (![theWindow isVisible]){
+		[theWindow makeKeyAndOrderFront:self];
+	}
+}
+
+- (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag
+{
+	if (![theWindow isVisible]){
+		[theWindow makeKeyAndOrderFront:self];
+	}
+	
+	return NO;
+}
+
 
 //UTILITIES
 

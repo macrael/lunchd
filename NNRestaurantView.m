@@ -115,7 +115,7 @@
 	if ([mePerson veto] != nil){
 		[vetoButton setEnabled:NO];
 	}
-	if ([mePerson state] == NNNotComingState || [mePerson name] == nil || state == NNChosenState){
+	if ([mePerson state] == NNNotComingState || [mePerson name] == nil || [mePerson gameIsOver]){
 		[voteButton setEnabled:NO];
 		[vetoButton setEnabled:NO];
 	}

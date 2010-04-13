@@ -16,6 +16,7 @@
 @synthesize veto;
 @synthesize votes;
 @synthesize host;
+@synthesize gameIsOver;
 
 - (id)initWithName:(NSString *)newName
 {
@@ -25,6 +26,7 @@
 		[self setState:NNUndefinedState];
 		[self setVeto:nil];
 		votes = [[NSMutableArray alloc] initWithCapacity:5];
+		gameIsOver = NO;
 	}
 	return self;
 }

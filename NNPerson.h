@@ -15,6 +15,7 @@
 	NSString *veto;		//veto is a string if it has been used, or nil if it has not.
 	NSMutableArray *votes;		//votes is a list of strings of restraunts they have voted for.
 	NSString *host;
+	BOOL gameIsOver;
 }
 
 @property (copy) NSString *name;
@@ -22,6 +23,7 @@
 @property (copy) NSString *veto;
 @property (retain) NSMutableArray *votes;
 @property (copy) NSString *host;
+@property (assign) BOOL gameIsOver;
 
 
 - (void)voteFor:(NSString *)restaurant;
