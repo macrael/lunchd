@@ -11,9 +11,12 @@
 #define LUNCH_SERVICE_PORT 2764
 
 static const unsigned int MessageHeaderSize = sizeof(UInt64);
-NSTimeInterval SocketTimeout = 30;
+NSTimeInterval SocketTimeout = -1;
 
 @implementation NNNetworkSync
+
+@synthesize connectedHosts;
+@synthesize connectedSockets;
 
 - (id)initWithController:(NNLunchControl *)control
 {
@@ -29,6 +32,7 @@ NSTimeInterval SocketTimeout = 30;
 	NSLog(@"Starting SErVER");
 	
 	connectedSockets = [[NSMutableArray alloc] initWithCapacity:5];
+	connectedHosts = [[NSMutableArray alloc] initWithCapacity:5];
 	
 	// Start listening socket
     NSError *error;
@@ -41,12 +45,12 @@ NSTimeInterval SocketTimeout = 30;
     // Advertise service with bonjour
     NSString *serviceName = [NSString stringWithFormat:@"Lunchd on %@", 
 							 [[NSProcessInfo processInfo] hostName]];
-    netService = [[NSNetService alloc] initWithDomain:@"" 
+    myNetService = [[NSNetService alloc] initWithDomain:@"" 
 												 type:@"_lunchd._tcp." 
 												 name:serviceName 
-												 port:2763];
-    netService.delegate = self;
-    [netService publish];
+												 port:LUNCH_SERVICE_PORT];
+    myNetService.delegate = self;
+    [myNetService publish];
 	
 }
 
@@ -59,7 +63,9 @@ NSTimeInterval SocketTimeout = 30;
 
 -(void)broadcastMessage:(NNNMessage *)message
 {
+	NSLog(@"Sending Message");
 	for (AsyncSocket *sock in connectedSockets){
+		NSLog(@"SENDING TO SOCK %@",sock);
 		[self sendMessage:message onSocket:sock];
 	}
 }
@@ -78,26 +84,38 @@ NSTimeInterval SocketTimeout = 30;
 
 - (void)onSocket:(AsyncSocket *)sock didAcceptNewSocket:(AsyncSocket *)newSocket
 {
-	NSLog(@"Accepted Socket");
+	NSLog(@"Accepted Socket %@",sock);
 	[connectedSockets addObject:newSocket];
+	[self setConnectedSockets:connectedSockets];
 }
 
 - (void)onSocket:(AsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
 {
 	NSLog(@"Accepted client %@:%hu", host, port);
 	
+	for (NSString *cHost in connectedHosts){
+		if ([cHost isEqualToString:host]){
+			NSLog(@"INSTANT DISCONNECT");
+			[sock disconnect];
+			return;
+		}
+	}
+	[connectedHosts addObject:host];
+	[self setConnectedHosts:connectedHosts];
+	
 	[self sendMessage:[controller currentMessage] onSocket:sock];
 	
 	[sock readDataToLength:MessageHeaderSize withTimeout:SocketTimeout tag:(long)0];
 }
 
-//- (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag
-//{
-//	[sock readDataToLength:MessageHeaderSize withTimeout:SocketTimeout tag:(long)0];
-//}
+- (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag
+{
+	NSLog(@"FINISHED WRITING DATA");
+}
 
 - (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
 {
+	NSLog(@"JUST GOT DATA: %d",tag);
 	if ( tag == 0 ) {
         // Header
         UInt64 header = *((UInt64*)[data bytes]);
@@ -121,13 +139,18 @@ NSTimeInterval SocketTimeout = 30;
 - (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err
 {
 	NSLog(@"Client Disconnected: %@:%hu", [sock connectedHost], [sock connectedPort]);
+	NSLog(@"ER: %@",err);
+	[connectedHosts removeObject:[sock connectedHost]];
+	[self setConnectedHosts:connectedHosts];
 	//probably send this to the controller so it can deal with the ramifications.
 	[controller lostConnectionToSocket:sock];
 }
 
 - (void)onSocketDidDisconnect:(AsyncSocket *)sock
 {
+	NSLog(@"SOCKET DISCONNECTO %@",sock);
 	[connectedSockets removeObject:sock];
+	[self setConnectedSockets:connectedSockets];
 }
 
 #pragma mark Net Service Browser Delegate Methods
@@ -135,9 +158,15 @@ NSTimeInterval SocketTimeout = 30;
 -(void)netServiceBrowser:(NSNetServiceBrowser *)aBrowser didFindService:(NSNetService *)aService moreComing:(BOOL)more
 {
 	//for now, lets not keep track of services?
-	NSLog(@"FOUND SERVICE!");
+	NSLog(@"FOUND SERVICE! %@",self);
+	NSLog(@"%@",aService);
+	if ([[myNetService name] isEqualToString:[aService name]]){
+		NSLog(@"MEMEMEEEM");
+		return;
+	}
+	[aService retain];
 	[aService setDelegate:self];
-	[aService resolveWithTimeout:30];
+	[aService resolveWithTimeout:0];
 	if (!more){
 		NSLog(@"DONE GETTING PEOPLE FOR NOW:");
 	}
@@ -145,22 +174,36 @@ NSTimeInterval SocketTimeout = 30;
 
 -(void)netServiceBrowser:(NSNetServiceBrowser *)aBrowser didRemoveService:(NSNetService *)aService moreComing:(BOOL)more
 {
-	
+	NSLog(@"BY BY SERVICE");
 }
 
 
-#pragma mark Net SerVice Delegate Methods
+#pragma mark Net Service Delegate Methods
 
--(void)netServiceDidResolveAddress:(NSNetService *)service
+- (void)netServiceWillResolve:(NSNetService *)sender
 {
+	NSLog(@"WILL IT RESOLVE?");
+	NSLog(@"%@",sender);
+}
+
+- (void)netServiceDidResolveAddress:(NSNetService *)sender
+{
+	NSLog(@"HELLO RESOLVER>");
 	//Might want to do a check here, if we already know about this address, then they already know about us and there is no need for a second connection.
 	NSError *error;
-	NSLog(@"Resolved Service with addresses %@",[service addresses]);
+	NSLog(@"Resolved Service with addresses %@",[sender addresses]);
+	if ([[sender addresses] lastObject] == nil){
+		NSLog(@"ERROR: Service has no address.");
+		return;
+	}
 	AsyncSocket *sock = [[[AsyncSocket alloc] initWithDelegate:self] autorelease];
-	[sock connectToAddress:[[service addresses] lastObject] error:&error];
+	[connectedSockets addObject:sock];
+	[self setConnectedSockets:connectedSockets];
+	[sock connectToAddress:[[sender addresses] lastObject] error:&error];
 }
 
--(void)netService:(NSNetService *)service didNotResolve:(NSDictionary *)errorDict {
+- (void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict {
+	NSLog(@"COULD NOT RESOLVE");
     NSLog(@"Could not resolve: %@", errorDict);
 }
 
@@ -176,6 +219,8 @@ NSTimeInterval SocketTimeout = 30;
 @synthesize veto;
 @synthesize votes;
 @synthesize restaurantList;
+@synthesize choice;
+@synthesize group;
 
 - (id) initWithCoder:(NSCoder *)aDecoder
 {
@@ -187,6 +232,8 @@ NSTimeInterval SocketTimeout = 30;
 		[self setVeto:[aDecoder decodeObjectForKey:@"veto"]];
 		[self setVotes:[aDecoder decodeObjectForKey:@"votes"]];
 		[self setRestaurantList:[aDecoder decodeObjectForKey:@"restaurantList"]];
+		[self setGroup:[aDecoder decodeObjectForKey:@"group"]];
+		[self setChoice:[aDecoder decodeObjectForKey:@"choice"]];
 	}
 	return self;
 }
@@ -199,6 +246,23 @@ NSTimeInterval SocketTimeout = 30;
 	[aCoder encodeObject:veto forKey:@"veto"];
 	[aCoder encodeObject:votes forKey:@"votes"];
 	[aCoder encodeObject:restaurantList forKey:@"restaurantList"];
+	[aCoder encodeObject:group forKey:@"group"];
+	[aCoder encodeObject:choice forKey:@"choice"];
+}
+
+- (NSString *)description
+{
+	NSMutableString *desc = [[NSMutableString alloc] initWithString:@""];
+	[desc appendFormat:@"tag: %d\n",tag];
+	[desc appendFormat:@"name: %@\n",name];
+	[desc appendFormat:@"state: %d\n",state];
+	[desc appendFormat:@"veto: %@\n",veto];
+	[desc appendFormat:@"votes: %@\n",votes];
+	[desc appendFormat:@"group: %@\n",group];
+	[desc appendFormat:@"choice: %@\n",choice];
+	[desc appendFormat:@"restaurantList: %@\n\n\n",restaurantList];
+	
+	return [NSString stringWithString:desc];
 }
 
 @end

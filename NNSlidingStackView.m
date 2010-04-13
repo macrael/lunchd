@@ -19,7 +19,6 @@
     if (self) {
 		stackBottom = 0.0;
 		stripeHeight = 60.0;
-		NSLog(@"I HAVE BEEN CREATED");
 		arrangedSubViews = [[NSMutableArray alloc] initWithCapacity:5];
 	}
     return self;
@@ -79,8 +78,6 @@
 	if (startIndex == endIndex){
 		return;
 	}
-	
-	NSLog(@"MOVE FROM %d TO %d", startIndex, endIndex);
 	
 	//grey out layer
 	//move all other layers while moving greyed out layer. 

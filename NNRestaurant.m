@@ -35,6 +35,7 @@
 
 - (void)giveVote
 {
+	NSLog(@"GIVE VOTE: %@",name);
 	[self setVotes:votes +1];
 	if (vetos == 0 && votes == 1){
 		[self setState:NNVotedForState];
@@ -43,15 +44,20 @@
 
 - (void)takeVote
 {
+	NSLog(@"TAKE VOTE: %@",name);
 	[self setVotes:votes -1];
 	if (vetos == 0 && votes == 0){
 		[self setState:NNUndefinedState];
+	}
+	if (vetos == -1){
+		NSLog(@"WOAH NEGATIVE VOOTES--------------------------------------------------");
 	}
 }
 
 - (void)giveVeto
 {
-	[self setVetos:vetos +1];
+	NSLog(@"GIVE VETO: %@",name);
+	[self setVetos:vetos + 1];
 	if (vetos == 1){
 		[self setState:NNVetoedState];
 	}
@@ -59,13 +65,17 @@
 
 - (void)takeVeto
 {
-	[self setVetos:vetos -1];
+	NSLog(@"TAKE VETO: %@",name);
+	[self setVetos:vetos - 1];
 	if (vetos == 0){
 		if (votes == 0){
 			[self setState:NNUndefinedState];
 		}else {
 			[self setState:NNVotedForState];
 		}
+	}
+	if (vetos == -1){
+		NSLog(@"WOAH NEGATIVE VETOS--------------------------------------------------");
 	}
 }
 

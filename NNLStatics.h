@@ -13,5 +13,6 @@ enum {
 	NNNotComingState = 2,
 	
 	NNVetoedState = 5,
-	NNVotedForState = 6
+	NNVotedForState = 6,
+	NNChosenState = 7
 };

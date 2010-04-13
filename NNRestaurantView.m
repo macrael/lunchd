@@ -14,7 +14,6 @@
 - (id)initWithFrame:(NSRect)frame andController:(NNLunchControl *)controller{
     self = [super initWithFrame:frame];
     if (self) {
-		NSLog(@"I HAVE BEEN Cratered");
 		[self setAutoresizingMask:NSViewWidthSizable];
 		
 		NSRect aFrame;
@@ -80,7 +79,6 @@
                         change:(NSDictionary *)change
                        context:(void *)context
 {
-	NSLog(@"KEYPATH CHANGE");
     if ([keyPath isEqual:@"state"]) {
 		[self updateState];
     }else{
@@ -117,11 +115,22 @@
 	if ([mePerson veto] != nil){
 		[vetoButton setEnabled:NO];
 	}
-	if ([mePerson state] == NNNotComingState || [mePerson name] == nil){
+	if ([mePerson state] == NNNotComingState || [mePerson name] == nil || state == NNChosenState){
 		[voteButton setEnabled:NO];
 		[vetoButton setEnabled:NO];
 	}
-	NSLog(@"EMEMEMEME: %@",[mePerson name]);
+}
+
+- (void)drawRect:(NSRect)rect
+{
+	//NSLog(@"Drawing RecT!: %@",[NSValue valueWithRect:rect]);
+	
+	if ([representedRestaurant state] == NNChosenState){
+		NSColor *selectedColor = [NSColor yellowColor];
+		[selectedColor set];
+		
+		[NSBezierPath fillRect:rect];
+	}
 }
 
 @end
@@ -132,7 +141,6 @@
 - (id)initWithFrame:(NSRect)frame andController:(id)controller{
     self = [super initWithFrame:frame];
     if (self) {
-		NSLog(@"I HAVE BEEN Cratered");
 		[self setAutoresizingMask:NSViewWidthSizable];
 		
 		NSRect aFrame;
@@ -176,7 +184,6 @@
                         change:(NSDictionary *)change
                        context:(void *)context
 {
-	NSLog(@"KEYPATH CHANGE");
     if ([keyPath isEqual:@"state"]) {
 		[self updateState];
     }else{

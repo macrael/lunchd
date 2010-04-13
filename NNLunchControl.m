@@ -15,12 +15,14 @@
 @synthesize people;
 @synthesize mePerson;
 @synthesize myDefaultRestaurants;
+@synthesize networkSync;
 
 - (id) init
 {
 	self = [super init];
 	if (self){
 		DEBUGS = 0;
+		getStartedNow = NO;
 		
 		NSLog(@"INININIT");
 		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -40,12 +42,13 @@
 		[self setMyDefaultRestaurants:defTemp];
 		
 		mePerson = [[NNPerson alloc] initWithName:[defaults stringForKey:@"name"]];
+		myGroup = [defaults stringForKey:@"group"];
 		
 		people = [[NSMutableArray alloc] init];
 		restaurants = [[NSMutableArray alloc] init];
 		restaurantList = [[NSMutableArray alloc] init];
 		
-		networkSync = [[NNNetworkSync alloc] initWithController:self];
+		[self setNetworkSync: [[NNNetworkSync alloc] initWithController:self]];
 		[networkSync startServer:self];
 		[networkSync startSearching];
 		
@@ -84,6 +87,16 @@
 	for (NSString *rName in resturantNames){
 		[self createNewRestaurantWithName:rName];
 	}
+	
+	//create the menubar icon. 
+	NSStatusBar *bar = [NSStatusBar systemStatusBar];
+	
+    menuBarItem = [bar statusItemWithLength:NSSquareStatusItemLength];
+    [menuBarItem retain];
+	[menuBarItem setHighlightMode:YES];
+	[menuBarItem setImage:[NSImage imageNamed:@"menubar_normal"]];
+	[menuBarItem setAction:@selector(menuBarIconWasPressed)];
+	
 }
 
 - (IBAction)syncUpDefaults:(id)sender
@@ -112,6 +125,7 @@
 	[restaurantSSView updateAll];
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	[defaults setObject:[nameField stringValue] forKey:@"name"];
+	[self broadcastMessageToAll];
 }
 
 
@@ -190,7 +204,6 @@
                         change:(NSDictionary *)change
                        context:(void *)context
 {
-	NSLog(@"KddEYPATH CHANGE");
     if ([keyPath isEqual:@"state"]) {
 		
 		if ([[object class] isEqual:[NNRestaurant class]]){
@@ -216,6 +229,16 @@
 	[mePerson setState:NNComingState];
 	[restaurantSSView updateAll];
 	[self setTopView:ininView];
+	[self broadcastMessageToAll];
+	
+	//check and see if everyone you know is already going, then you can call it if that is the case. 
+	
+	if (counterDown){
+		[counterDown invalidate];
+	}
+	if (!endChoice){
+		counterDown = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(countedDownFromIn:) userInfo:nil repeats:NO];	
+	}
 }
 - (IBAction)imOut:(id)sender
 {
@@ -224,8 +247,70 @@
 	[self extricatePerson:mePerson];
 	[restaurantSSView updateAll];
 	[self setTopView:outoutView];
+	[self broadcastMessageToAll];
+	if (counterDown){
+		[counterDown invalidate];
+		counterDown = nil;
+	}
 }
 
+
+//This method is called some time after you have said you are in.
+//Pick a place to go and notify everyone.
+- (void)countedDownFromIn:(NSTimer *)theTimer
+{
+	counterDown = nil;
+	NSLog(@"COUNTED DOWN!");
+	if (endChoice){
+		return;
+	}
+	//pick a place to go and send out a message.
+	NSMutableArray *choices = [NSMutableArray arrayWithCapacity:5];
+	for (NNRestaurant *rest in restaurants){
+		if ([rest vetos]){
+			continue;
+		}
+		int i;
+		for (i = 0; i < [rest votes]; i ++){
+			[choices addObject:[rest name]];
+		}
+	}
+	if ([choices count] == 0){
+		NSLog(@"NEXT TIME YOU SHOULD CHOOSE SOMETHING.");
+		for (NNRestaurant *rest in restaurants){
+			[choices addObject:[rest name]];
+		}
+	}
+	
+	NSLog(@"CHOICES: %@",choices);
+	int choice = random() % [choices count];
+	NSString *theChoice = [choices objectAtIndex:choice];
+	NSLog(@"CHO0SE: %@",[choices objectAtIndex:choice]);
+	
+	[self endGame:theChoice];
+	[self broadcastMessageToAll];
+}
+
+
+- (void)endGame:(NSString *)winningName
+{
+	NSLog(@"GAME IS OVER> WINNDER> %@",winningName);
+	if (endChoice){
+		if ([winningName isEqualToString:endChoice]){
+			return;
+		}
+		NSLog(@"WEIRD< SHOULDn't already have a choice");
+	}
+	endChoice = [winningName copy];
+	//What happens if you are not going?
+	NNRestaurant *chosenRest = [self objectWithName:endChoice fromArray:restaurants];
+	//highlight one random choice. move it to the top.
+	[chosenRest setState:NNChosenState];
+	[self updateRestaurantPosition:chosenRest];
+	//change the top view to say: "time to go"
+	
+	[restaurantSSView updateAll];
+}
 
 // Restraunts
 
@@ -236,6 +321,7 @@
 	[rest giveVote];
 	//this needs to get the view to redraw. 
 	[restaurantSSView updateAll];
+	[self broadcastMessageToAll];
 }
 
 - (IBAction)vetoButtonPress:(id)sender
@@ -248,6 +334,7 @@
 	[rest giveVeto];
 	[mePerson setVeto:[rest name]];
 	[restaurantSSView updateAll];
+	[self broadcastMessageToAll];
 }
 
 
@@ -256,12 +343,11 @@
 
 - (void)updateRestaurantPosition:(NNRestaurant *)restaurant
 {
-	NSLog(@"UPDATE R FOR %@",[restaurant name]);
 	//initial pass is just move to top and bottom for vote and veto.
 	//for now assume it was just changed to need moving. 
 	int curIndex = [restaurants indexOfObject:restaurant];
 	
-	if ([restaurant state] == NNVotedForState){
+	if ([restaurant state] == NNVotedForState || [restaurant state] == NNChosenState){
 		//this has been voted for, move it to the top.
 		if (curIndex == 0){
 			return;
@@ -286,22 +372,28 @@
 		//all things added are added in this state, so we will special case it. 
 		
 		if (curIndex == [restaurants count] -1 && curIndex >0){
-			if ([[restaurants objectAtIndex:curIndex-1] state] != NNVetoedState) {
+			BOOL noVeto = YES;
+			for (NNRestaurant *r in restaurants){
+				if ([r state] == NNVetoedState){
+					noVeto = NO;
+				}
+			}
+			if (noVeto) {
 				return;
 			}
 		}
 		
 		int i;
-		for (i = 0; i < [restaurants count]; i++){
-			if ([[restaurants objectAtIndex:i] state] != NNVotedForState && i != curIndex){
+		for (i = [restaurants count] - 1; i >= 0 ; i--){
+			if ([[restaurants objectAtIndex:i] state] == NNVotedForState ){
 				break;
 			}
 		}
+		if (i < 0){
+			i = 0;
+		}
 		if (curIndex == i){
 			return;
-		}
-		if (i == [restaurants count]){
-			i--;
 		}
 		[restaurants removeObjectAtIndex:curIndex];
 		[restaurants insertObject:restaurant atIndex:i];
@@ -389,6 +481,16 @@
 
 - (void)dealWithMessage:(NNNMessage *)message fromSocket:(AsyncSocket *)socket
 {
+	NSLog(@"Message Recieved:\n%@",message);
+	
+	if (( ( [message group] == nil || myGroup == nil ) && myGroup != [message group] ) ||
+		( ( [message group] != nil && myGroup != nil ) && ![myGroup isEqualToString:[message group]] )){
+		NSLog(@"Groups are not matching!");
+		[networkSync onSocket:socket willDisconnectWithError:nil];
+		[socket disconnect];
+		return;
+	}
+	
 	NSString *personName = [message name];
 	if (personName == nil){
 		//This way, if you sent out before you had a name, nothing is recorded.
@@ -397,27 +499,17 @@
 	}
 	NNPerson *thePerson = nil;
 	for (NNPerson *person in people){
-		if ([[person name] isEqualToString:personName]){
+		if ([[person host] isEqualToString:[socket connectedHost]]){
 			thePerson = person;
 		}
 	}
 	if (thePerson == nil){
 		//create new person and add it to people. 
 		thePerson = [self createNewPersonWithName:personName];
-		[thePerson setSocket:socket];
+		[thePerson setHost:[socket connectedHost]];
 	}else {
-		//check and see if sockets match;
-		BOOL isEq = [thePerson socket] == socket;
-		if (isEq){
-			NSLog(@"Sockets are literally equal");
-		}else {
-			NSLog(@"SOCKETS ARE NOT LITERALLY EQ");
-		}
-		isEq = [[thePerson socket] isEqual:socket];
-		if (isEq){
-			NSLog(@"Sockets Are EQUAL!");
-		}else {
-			NSLog(@"Sockets are NOT EQLA??");
+		if ([thePerson host] == nil){
+			NSLog(@"THIS SHOULD NEVER HAPPEN< THE PERSON HAS TO HAVE A HOST>");
 		}
 	}
 	//check and see if they are coming, and if that matches. 
@@ -433,6 +525,15 @@
 	
 	if ([thePerson state] != [message state]){
 		[thePerson setState:[message state]];
+		if (![theWindow isVisible]){
+			[menuBarItem setImage:[NSImage imageNamed:@"menubar_excited"]];
+			//play a "bing" noise.
+			if (!getStartedNow){
+				NSSound *bellRing = [NSSound soundNamed:@"bell_ring"];
+				[bellRing play];
+				getStartedNow = YES;
+			}
+		}
 	}
 	
 	//TODO: Optimization, might should have a dictionary of names to objects instead of just arrays. (how preserve ordering? Don't worry about it?)
@@ -446,6 +547,9 @@
 	//go through all their votes and if they have new ones, update those restaurats and display them. 
 	NSArray *newVotes = [self rightDiffBetweenArray:[thePerson votes] andArray:[message votes]];
 	for (NSString *vote in newVotes){
+		if (![theWindow isVisible]){
+			[menuBarItem setImage:[NSImage imageNamed:@"menubar_excited"]];
+		}
 		NNRestaurant *rest = [self objectWithName:vote fromArray:restaurants];
 		[rest giveVote];
 	}
@@ -456,13 +560,17 @@
 		if (![[thePerson veto] isEqualToString:[message veto]]){
 			NNRestaurant *vRest = [self objectWithName:[message veto] fromArray:restaurants];
 			[vRest giveVeto];
-		}
-		if ([thePerson veto] != nil) {
-			NNRestaurant *vRest = [self objectWithName:[thePerson veto] fromArray:restaurants];
-			[vRest takeVeto];
+			if ([thePerson veto] != nil) {
+				NNRestaurant *vRest = [self objectWithName:[thePerson veto] fromArray:restaurants];
+				[vRest takeVeto];
+			}
 		}
 	}
 	[thePerson setVeto:[message veto]];
+	
+	if ([message choice]){ 
+		[self endGame:[message choice]];
+	}
 	
 }
 
@@ -470,11 +578,14 @@
 - (NNNMessage *)currentMessage
 {
 	NNNMessage *message = [[NNNMessage alloc] init];
+	[message setTag:0];
 	[message setName:[mePerson name]];
 	[message setState:[mePerson state]];
 	[message setVeto:[mePerson veto]];
 	[message setVotes:[mePerson votes]];
 	[message setRestaurantList:restaurantList];
+	[message setGroup:myGroup];
+	[message setChoice:endChoice];
 	
 	return message;
 }
@@ -483,9 +594,8 @@
 - (void)lostConnectionToSocket:(AsyncSocket *)socket
 {
 	for (NNPerson *person in people){
-		if ([[person socket] isEqual:socket]){
+		if ([[person host] isEqual:[socket connectedHost]]){
 			[person setState:NNNotComingState];
-			[person setSocket:nil];
 			[self extricatePerson:person];
 			return;
 		}
@@ -495,12 +605,25 @@
 {
 	NNNMessage *msg = [self currentMessage];
 	
-	
-	for (NNPerson *person in people){
-		[networkSync sendMessage:msg onSocket:[person socket]];
-	}
+	[networkSync broadcastMessage:msg];
 }
 
+- (void)menuBarIconWasPressed
+{
+	NSLog(@"YOU PRESSED THE MENU ICON!");
+	[menuBarItem setImage:[NSImage imageNamed:@"menubar_normal"]];
+	if (![NSApp isActive]){
+		[NSApp activateIgnoringOtherApps:YES];
+		[theWindow makeKeyAndOrderFront:self];
+	}else {
+		if (![theWindow isVisible]){
+			[theWindow makeKeyAndOrderFront:self];
+		}else {
+			[theWindow orderOut:self];
+			[NSApp hide:self];
+		}
+	}
+}
 
 //UTILITIES
 
@@ -531,7 +654,7 @@
 
 
 - (IBAction)debugButtonClick:(id)sender
-{	
+{		
 	//test message:
 	if (DEBUGS == 0){
 		NNNMessage *message = [[NNNMessage alloc] init];

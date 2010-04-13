@@ -16,14 +16,23 @@
 @interface NNNetworkSync : NSObject {
 	AsyncSocket *listeningSocket;
 	NNLunchControl *controller;
-	NSNetService *netService;
+	NSNetService *myNetService;
 	NSNetServiceBrowser *netBrowser;
 	NSMutableArray *connectedSockets;
+	NSMutableArray *connectedHosts;
 }
+@property (retain) NSMutableArray *connectedSockets;
+@property (retain) NSMutableArray *connectedHosts;
+
 - (id)initWithController:(NNLunchControl *)control;
 - (IBAction)startServer:(id)sender;
 - (void)startSearching;
 - (void)sendMessage:(NNNMessage *)message onSocket:(AsyncSocket*)socket;
+
+- (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err;
+
+- (void)broadcastMessage:(NNNMessage *)message;
+- (void)netServiceDidResolveAddress:(NSNetService *)sender;
 
 @end
 
@@ -35,7 +44,9 @@
 	NSString *veto;
 	NSArray *votes;
 	NSArray *restaurantList;
+	NSString *choice;
 	
+	NSString *group;
 }
 
 @property (assign) int tag;
@@ -44,5 +55,7 @@
 @property (copy) NSString *veto;
 @property (retain) NSArray *votes;
 @property (retain) NSArray *restaurantList;
+@property (copy) NSString *group;
+@property (copy) NSString *choice;
 
 @end

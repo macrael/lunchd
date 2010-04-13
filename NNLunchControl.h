@@ -21,14 +21,18 @@
 	IBOutlet NNSlidingStackView *restaurantSSView;
 	IBOutlet NNSlidingStackView *personSSView;
 	
+	BOOL getStartedNow;
+	BOOL gameIsOver;
+	
 	NSMutableArray *people;
 	NSMutableArray *restaurants;
-	NNPerson *mePerson;
 	
 	NSMutableArray *restaurantList;
 	
 	//YOU
-	NSString *myName;
+	NSString *myGroup;
+	NNPerson *mePerson;
+	NSString *endChoice;
 	
 	//TOP FIELDS
 	NSView *currentTopView;
@@ -45,6 +49,10 @@
 	
 	NNNetworkSync *networkSync;
 	
+	
+	NSStatusItem *menuBarItem;
+	NSTimer *counterDown;
+	
 	int DEBUGS;
 }
 
@@ -52,13 +60,14 @@
 @property (retain) NSMutableArray *people;
 @property (retain) NNPerson *mePerson;
 @property (retain) NSMutableArray *myDefaultRestaurants;
+@property (retain) NNNetworkSync *networkSync;
 
 //- (void)addRestaurant:(NSString *)newRestaurant;
 
 - (IBAction)imIn:(id)sender;
 - (IBAction)imOut:(id)sender;
 
-
+- (void)endGame:(NSString *)winningName;
 - (void)playWhoAreYou:(id)sender;
 
 - (NNRestaurant *)createNewRestaurantWithName:(NSString *)name;
