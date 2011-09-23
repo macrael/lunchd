@@ -47,6 +47,7 @@
 		people = [[NSMutableArray alloc] init];
 		restaurants = [[NSMutableArray alloc] init];
 		restaurantList = [[NSMutableArray alloc] init];
+		slidingQueue = [[NSMutableArray alloc] init];
 		
 		[self setNetworkSync: [[NNNetworkSync alloc] initWithController:self]];
 		[networkSync startServer:self];
@@ -87,6 +88,14 @@
 	for (NSString *rName in resturantNames){
 		[self createNewRestaurantWithName:rName];
 	}
+	
+	
+	//setup mouse tracking in restaurant
+	trackingArea = [[NSTrackingArea alloc] initWithRect:[restaurantSSView frame] 
+												options:(NSTrackingMouseEnteredAndExited | NSTrackingInVisibleRect | NSTrackingActiveInKeyWindow ) 
+												  owner:self userInfo:nil];
+	[restaurantSSView addTrackingArea:trackingArea];
+	
 	
 	//create the menubar icon. 
 	NSStatusBar *bar = [NSStatusBar systemStatusBar];
@@ -351,25 +360,23 @@
 	//initial pass is just move to top and bottom for vote and veto.
 	//for now assume it was just changed to need moving. 
 	int curIndex = [restaurants indexOfObject:restaurant];
+	int toIndex;
 	
 	if ([restaurant state] == NNVotedForState || [restaurant state] == NNChosenState){
 		//this has been voted for, move it to the top.
 		if (curIndex == 0){
 			return;
 		}
-		[restaurants removeObjectAtIndex:curIndex];
-		[restaurants insertObject:restaurant atIndex:0];
+		toIndex = 0;
 		
-		[restaurantSSView slideViewAtIndex:curIndex toIndex:0];
 	}else if ([restaurant state] == NNVetoedState) {
 		//move to the bottom. 
 		if (curIndex == [restaurants count] -1){
 			return;
 		}
-		[restaurants removeObjectAtIndex:curIndex];
-		[restaurants addObject:restaurant];
 		
-		[restaurantSSView slideViewAtIndex:curIndex toIndex:[restaurants count] -1];
+		toIndex = [restaurants count] -1;
+		
 	}else {
 		//need to move back to the middle. 
 		//might be able to use this to generalize all of these just with this one.
@@ -400,10 +407,23 @@
 		if (curIndex == i){
 			return;
 		}
-		[restaurants removeObjectAtIndex:curIndex];
-		[restaurants insertObject:restaurant atIndex:i];
 		
-		[restaurantSSView slideViewAtIndex:curIndex toIndex:i];
+		toIndex = i;
+	}
+	
+	[restaurants removeObjectAtIndex:curIndex];
+	[restaurants insertObject:restaurant atIndex:toIndex];
+	
+	
+	NSPoint mouseLoc = [[NSApp mainWindow] mouseLocationOutsideOfEventStream];
+	NSPoint inPoint = [restaurantSSView convertPoint:mouseLoc fromView:nil];
+	if ([restaurantSSView mouse:inPoint inRect:[restaurantSSView visibleRect]]){
+		NNShiftTuple *capsule = [[[NNShiftTuple alloc] init] autorelease];
+		[capsule setToIndex:toIndex];
+		[capsule setFromIndex:curIndex];
+		[slidingQueue addObject:capsule];
+	}else {
+		[restaurantSSView slideViewAtIndex:curIndex toIndex:toIndex];
 	}
 
 }
@@ -652,6 +672,21 @@
 	return NO;
 }
 
+//---------- Mouse Tracking in view
+
+- (void)mouseEntered:(NSEvent *)theEvent
+{
+	//NSLog(@"Mouse ENTERED");
+}
+
+- (void)mouseExited:(NSEvent *)theEvent
+{
+	for (NNShiftTuple *capsule in slidingQueue){
+		[restaurantSSView slideViewAtIndex:[capsule fromIndex] toIndex:[capsule toIndex]];
+	}
+	[slidingQueue removeAllObjects];
+}
+
 
 //UTILITIES
 
@@ -759,5 +794,12 @@
 	[copy setRName: [self rName]];
 	return copy;
 }
+
+@end
+
+@implementation NNShiftTuple
+
+@synthesize fromIndex;
+@synthesize toIndex;
 
 @end

@@ -106,6 +106,13 @@
 	
 }
 
+//NON GENERAL FUCNTIONS
+
+- (void)updateTrackingAreas
+{
+	NSLog(@"I DIDNT UDATE A TRACKING AREA");
+}
+
 - (void)updateAll
 {
 	for (NSView *view in arrangedSubViews){

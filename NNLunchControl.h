@@ -20,12 +20,14 @@
 @interface NNLunchControl : NSObject {
 	IBOutlet NNSlidingStackView *restaurantSSView;
 	IBOutlet NNSlidingStackView *personSSView;
+	NSTrackingArea *trackingArea;
 	
 	BOOL getStartedNow;
 	BOOL gameIsOver;
 	
 	NSMutableArray *people;
 	NSMutableArray *restaurants;
+	NSMutableArray *slidingQueue;
 	
 	NSMutableArray *restaurantList;
 	
@@ -104,5 +106,15 @@
 }
 
 @property (retain) NSString *rName;
+
+@end
+
+@interface NNShiftTuple : NSObject {
+	int fromIndex;
+	int toIndex;
+}
+
+@property (assign) int fromIndex;
+@property (assign) int toIndex;
 
 @end

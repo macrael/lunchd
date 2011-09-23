@@ -15,6 +15,7 @@
 	float stackBottom;
 	float stripeHeight;
 }
+
 @property (assign) float stackBottom;
 @property (assign) float stripeHeight;
 

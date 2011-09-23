@@ -23,6 +23,17 @@
 		[voteButton setButtonType:NSMomentaryLightButton];
 		[voteButton setBezelStyle:NSRoundedBezelStyle];
 		[voteButton setTitle:@"Vote"];
+		
+//		NSImage *up_rest = [NSImage imageNamed:@"up_rest.png"];
+//		NSImage *up_push = [NSImage imageNamed:@"up_push.png"];
+//		NSImage *up_select = [NSImage imageNamed:@"up_select.png"];
+//		
+//		
+//		[voteButton setButtonType:NSToggleButton];
+//		[voteButton setBezelStyle:NSCircularBezelStyle];
+//		[voteButton setImage:up_rest];
+//		[voteButton setAlternateImage:up_select];
+		
 		[voteButton setAction:@selector(voteButtonPress:)];
 		[voteButton setTarget:controller];
 		
